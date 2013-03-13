@@ -51,7 +51,7 @@ def main():
   parser = argparse.ArgumentParser(description='Process some todos.',
                                    formatter_class=argparse.RawTextHelpFormatter) 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
-                   'del','rm','pri','p']
+                   'del', 'depri','dp','rm','pri','p']
   parser.add_argument(dest='actions',metavar='action', 
                       choices=list_of_choices,
                       help= "list|ls\n"
@@ -61,6 +61,7 @@ def main():
                       'archive\n'
                       "do\n"
                       "del|rm\n"
+                      "depri|pri\n"
                       'pri|p         ITEM#  PRIORITY'  )
   parser.add_argument(dest='remainingArguments',metavar='task number or description', 
                       nargs=argparse.REMAINDER,
@@ -130,43 +131,6 @@ def main():
                     source.write(line)
                     #TODO archive if set as default
         break
-
-#    if case('del','rm'):
-#        #print "delete"
-#        #print "TODO_FILE:",TODO_FILE
-#        linesDeleted=0
-#        for itemNum in args.remainingArguments:
-#          #print "item:"+itemNum
-#          itemNum.replace(',','')  #if comma separated remove the comma,
-#          itemNum=int(itemNum)
-#          with open(TODO_FILE, "r") as source:
-#            lines = source.readlines()
-#          source.close()
-#          #print "lines:",lines
-#          with open(TODO_FILE, "wb") as source:
-#            lineCount=0
-#            #print "lineCount",lineCount
-#            for line in lines:
-#              lineCount += 1
-#              #print lineCount," ",line,
-#              if lineCount != itemNum: 
-#                #print "not it, write the line"
-#                source.write(line)
-#              else:
-#                question = "\nDelete '"+line+"'? (Y/n)"
-#                var = raw_input(question)
-#                if var == 'Y': 
-#                  linesDeleted  += 1
-#                  print "You entered ", var, " deleted."
-#                  if  TODOTXT_PRESERVE_LINE_NUMBERS == 1:                 
-#                    line="\n"
-#                  else:
-#                    line=""
-#                else: 
-#                  print "You entered ",var," OK, not deleting."
-#                source.write(line)
-#        print "TODO: ",linesDeleted,"task(s) deleted"
-#        break
     if case('del','rm'):
         #print "delete"
         #print "TODO_FILE:",TODO_FILE
@@ -208,11 +172,25 @@ def main():
         print 'usage: todo.sh pri ITEM# PRIORITY\nnote: PRIORITY must be anywhere from A to Z.'
         break
       with open(TODO_FILE, "r") as source:
-              lines = source.readlines()
+        lines = source.readlines()
       #get rid of the current Priority
       lines[ITEMNUM]=re.sub('^\(.\)','',lines[ITEMNUM])
       #add the new priority 
       lines[ITEMNUM]="(" + PRIORITY + ") " + lines[ITEMNUM] 
+      with open(TODO_FILE, "wb") as file:
+        file.writelines(lines)
+      break
+    if case('depri','dp'):
+      with open(TODO_FILE, "r") as source:
+        lines = source.readlines()
+      tempITEMNUM=','.join(args.remainingArguments)
+      ITEMNUMS=[int(x.strip()) for x in tempITEMNUM.split(',') if re.match('\d+',x)]
+      print ITEMNUMS
+      for ITEMNUM in ITEMNUMS:
+        ITEMNUM -= 1 # to match the list index
+        print ITEMNUM+1, lines[ITEMNUM]
+        lines[ITEMNUM]=re.sub('^\(.\) ','',lines[ITEMNUM])
+        print "TODO: ", ITEMNUM+1," deprioritized"
       with open(TODO_FILE, "wb") as file:
         file.writelines(lines)
       break
