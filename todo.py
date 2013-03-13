@@ -15,13 +15,13 @@ import os
 import re
 
 print os.environ['HOME']
-TODO_DIR=os.environ['HOME']+r'\Documents\python-class\todotxt'
+TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
 TODO_FILE=TODO_DIR+"/todo.txt"
 DONE_FILE=TODO_DIR+"/done.txt"
 REPORT_FILE=TODO_DIR+"/report.txt"
 TMP_FILE= TODO_DIR+"/todo.tmp"
 
-TODOTXT_PRESERVE_LINE_NUMBERS = 1
+TODOTXT_PRESERVE_LINE_NUMBERS = 0
 
 
 # This class provides the functionality we want. You only need to look at
@@ -131,40 +131,68 @@ def main():
                     #TODO archive if set as default
         break
 
+#    if case('del','rm'):
+#        #print "delete"
+#        #print "TODO_FILE:",TODO_FILE
+#        linesDeleted=0
+#        for itemNum in args.remainingArguments:
+#          #print "item:"+itemNum
+#          itemNum.replace(',','')  #if comma separated remove the comma,
+#          itemNum=int(itemNum)
+#          with open(TODO_FILE, "r") as source:
+#            lines = source.readlines()
+#          source.close()
+#          #print "lines:",lines
+#          with open(TODO_FILE, "wb") as source:
+#            lineCount=0
+#            #print "lineCount",lineCount
+#            for line in lines:
+#              lineCount += 1
+#              #print lineCount," ",line,
+#              if lineCount != itemNum: 
+#                #print "not it, write the line"
+#                source.write(line)
+#              else:
+#                question = "\nDelete '"+line+"'? (Y/n)"
+#                var = raw_input(question)
+#                if var == 'Y': 
+#                  linesDeleted  += 1
+#                  print "You entered ", var, " deleted."
+#                  if  TODOTXT_PRESERVE_LINE_NUMBERS == 1:                 
+#                    line="\n"
+#                  else:
+#                    line=""
+#                else: 
+#                  print "You entered ",var," OK, not deleting."
+#                source.write(line)
+#        print "TODO: ",linesDeleted,"task(s) deleted"
+#        break
     if case('del','rm'):
         #print "delete"
         #print "TODO_FILE:",TODO_FILE
         linesDeleted=0
+        with open(TODO_FILE, "r") as source:
+          lines = source.readlines()
         for itemNum in args.remainingArguments:
           #print "item:"+itemNum
+          print "lines:",lines
           itemNum.replace(',','')  #if comma separated remove the comma,
           itemNum=int(itemNum)
-          with open(TODO_FILE, "r") as source:
-            lines = source.readlines()
-          source.close()
-          #print "lines:",lines
-          with open(TODO_FILE, "wb") as source:
-            lineCount=0
-            #print "lineCount",lineCount
-            for line in lines:
-              lineCount += 1
-              #print lineCount," ",line,
-              if lineCount != itemNum: 
-                #print "not it, write the line"
-                source.write(line)
-              else:
-                question = "\nDelete '"+line+"'? (Y/n)"
-                var = raw_input(question)
-                if var == 'Y': 
-                  linesDeleted  += 1
-                  print "You entered ", var, " deleted."
-                  if  TODOTXT_PRESERVE_LINE_NUMBERS == 1:                 
-                    line="\n"
-                  else:
-                    line=""
-                else: 
-                  print "You entered ",var," OK, not deleting."
-                source.write(line)
+          itemNum -= 1 #to match list index numbering
+          question = "\nDelete '"+lines[itemNum]+"'? (Y/n)"
+          var = raw_input(question)
+          if var == 'Y': 
+            linesDeleted += 1
+            lines[itemNum]="\n"
+            print "You entered ", var, " deleted."
+          else: 
+            print "You entered ",var," OK, not deleting."
+        if  TODOTXT_PRESERVE_LINE_NUMBERS == 0: #then get rid of empty lines before 
+        #writing need to do this afterwards because deleting within the for above 
+        #for multiple deletes will mess up the index
+          lines = [ line for line in lines if line != "\n"] 
+        with open(TODO_FILE, "wb") as file:
+          file.writelines(lines)
         print "TODO: ",linesDeleted,"task(s) deleted"
         break
     if case('append','app'): 
@@ -185,6 +213,8 @@ def main():
       lines[ITEMNUM]=re.sub('^\(.\)','',lines[ITEMNUM])
       #add the new priority 
       lines[ITEMNUM]="(" + PRIORITY + ") " + lines[ITEMNUM] 
+      with open(TODO_FILE, "wb") as file:
+        file.writelines(lines)
       break
     if case(): # default, could also just omit condition or 'if True'
       print "something else!"
