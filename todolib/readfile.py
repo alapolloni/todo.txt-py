@@ -46,10 +46,11 @@ def _list(FILE,TERMS):
     if re.match('-',TERM): 
       TERM=TERM[1:]
       print "return all without TERM:"+TERM
-      SRC = filter (lambda a: not re.search(TERM,a), SRC)
+      SRC = filter (lambda a: not re.search(re.escape(TERM),a), SRC)
     else:
       print "return all with TERM:"+TERM
-      SRC = filter (lambda a: re.search(TERM,a), SRC)
+      #SRC = filter (lambda a: re.search(TERM,a), SRC)
+      SRC = filter (lambda a: re.search(re.escape(TERM),a), SRC)
   
   #print SRC
 

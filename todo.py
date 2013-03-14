@@ -54,15 +54,17 @@ def main():
                    'del', 'depri','dp','rm','pri','p']
   parser.add_argument(dest='actions',metavar='action', 
                       choices=list_of_choices,
-                      help= "list|ls\n"
+                      help= 
                       "add|a\n"
                       "addto\n"
                       'append|app  ITEM# "TEXT TO APPEND" \n'
                       'archive\n'
-                      "do\n"
                       "del|rm\n"
-                      "depri|pri\n"
-                      'pri|p         ITEM#  PRIORITY'  )
+                      "dp|depri|\n"
+                      "do\n"
+                      "list|ls\n"
+
+                      'pri|p         ITEM#  PRIORITY  \n'  )
   parser.add_argument(dest='remainingArguments',metavar='task number or description', 
                       nargs=argparse.REMAINDER,
                       help="remaining args help")
