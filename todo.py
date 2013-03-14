@@ -52,7 +52,7 @@ def main():
                                    formatter_class=argparse.RawTextHelpFormatter) 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del', 'depri','dp','listall','lsa','listcon','lsc',
-                   'listfile','lsf','rm',
+                   'listfile','lsf','listpri','lsp','rm',
                    'pri','p']
   parser.add_argument(dest='actions',metavar='action', 
                       choices=list_of_choices,
@@ -105,7 +105,24 @@ def main():
     if case('listfile','lsf'): 
         SRC=args.remainingArguments.pop(0)  #pop the 1st item off the list as the file
         todolib.readfile._list(SRC,args.remainingArguments)
-        break
+        break    
+    if case('listpri','lsp'):
+        if len(args.remainingArguments) > 0 :
+          PRI= args.remainingArguments.pop(0)
+          if re.match('[A-Z|a-z]',PRI):
+            PRI= PRI.upper()
+          else:
+            print 'usage: todo.sh listpri ITEM# PRIORITY\nnote: PRIORITY must be anywhere from A to Z.'
+            break
+        else:
+          PRI='.'
+          #TODO dont know how to fix this since _list does an escape on the TERM
+          #and in this case, we don't want that.  this seems to be the ONLY case.
+          print "error: this doesn't do what you think it should"
+          break
+        listPRI=[ '('+PRI+')' ]
+        todolib.readfile._list(TODO_FILE,listPRI)
+        break    
     if case('add') or case ('a'):
         print "add"
         todolib.readfile._add(TODO_FILE,args.remainingArguments)
