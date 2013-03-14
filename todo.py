@@ -51,7 +51,8 @@ def main():
   parser = argparse.ArgumentParser(description='Process some todos.',
                                    formatter_class=argparse.RawTextHelpFormatter) 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
-                   'del', 'depri','dp','rm','pri','p']
+                   'del', 'depri','dp','listall','lsa','listcon','lsc','rm',
+                   'pri','p']
   parser.add_argument(dest='actions',metavar='action', 
                       choices=list_of_choices,
                       help= 
@@ -60,9 +61,11 @@ def main():
                       'append|app  ITEM# "TEXT TO APPEND" \n'
                       'archive\n'
                       "del|rm\n"
-                      "dp|depri|\n"
-                      "do\n"
-                      "list|ls\n"
+                      "dp|depri ITEM#[, ITEM#, ITEM#, ...]\n"
+                      "do ITEM#[, ITEM#, ITEM#, ...]\n"
+                      "list|ls       [TERM]\n"
+                      "listall|lsa   [TERM]\n"
+                      "listcon|lsc\n"
 
                       'pri|p         ITEM#  PRIORITY  \n'  )
   parser.add_argument(dest='remainingArguments',metavar='task number or description', 
@@ -82,6 +85,21 @@ def main():
         print "list"
         todolib.readfile._list(TODO_FILE,args.remainingArguments)
         #todolib.readfile.printx()
+        break
+    if case('listall','lsa'): 
+        todolib.readfile._list(TODO_FILE,args.remainingArguments)
+        todolib.readfile._list(DONE_FILE,args.remainingArguments)
+        break
+    if case('listcon','lsc'): 
+        with open(TODO_FILE, "r") as source:
+          lines = source.readlines()
+        #find all the contexts and return them.  you get lists of lists
+        alist=[re.findall('(\@\w+)[\s|\\n]',l) for l in lines]
+        #squash the lists
+        blist=[item for sublist in alist for item in sublist]
+        #turn in to a set to get uniques and then back into a list
+        clist=list(set(blist))
+        for x in clist: print x
         break
     if case('add') or case ('a'):
         print "add"

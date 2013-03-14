@@ -14,20 +14,10 @@ def printx():
   return
 
 def _list(FILE,TERMS):
-  print "def _list"
-  print "FILE:",FILE
-  print "TERMS:",TERMS
   if os.path.isfile(FILE): src=FILE
   elif os.path.isfile(FILE): src=FILE
   else: sys.exit("TODO: File"+FILE+"does not exit")
     
-  ## Get our search arguments, if any
-  #TODO: 
-
-  ## Prefix the filter_command with the pre_filter_command
-  #TODO: filter_command="${pre_filter_command:-}"
- 
-  #f=open(r'C:\Users\aapollon\Documents\My Dropbox\TaskPaper\todo.txt','r')
   f=open(FILE,'r')
   SRC=f.readlines()
 
@@ -35,13 +25,14 @@ def _list(FILE,TERMS):
   ## We need one level of padding for each power of 10 $LINES uses
   LINES=len(SRC)
   PADDING=len(str(LINES))
-
+  ## and add line numbers to the SRC
   for x in range(len(SRC)):
     #SRC[x]=str(x+1)+" "*PADDING+SRC[x]
     SRC[x]=str(x+1).zfill(PADDING)+" "+SRC[x]
 
-  print SRC
+  originalSRCLenth=len(SRC) 
 
+  #each time through the FOR loop cuts down SRC
   for TERM in TERMS:
     if re.match('-',TERM): 
       TERM=TERM[1:]
@@ -49,13 +40,11 @@ def _list(FILE,TERMS):
       SRC = filter (lambda a: not re.search(re.escape(TERM),a), SRC)
     else:
       print "return all with TERM:"+TERM
-      #SRC = filter (lambda a: re.search(TERM,a), SRC)
       SRC = filter (lambda a: re.search(re.escape(TERM),a), SRC)
-  
-  #print SRC
-
+  #only after done, show the end results
   for x in SRC:
     print x,
+  print "TODO:", len(SRC), " of ", originalSRCLenth, " tasks shown"
 
 def _add(FILE,TERMS):
   print "FILE:",FILE
