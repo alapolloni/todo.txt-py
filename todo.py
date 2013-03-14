@@ -51,7 +51,8 @@ def main():
   parser = argparse.ArgumentParser(description='Process some todos.',
                                    formatter_class=argparse.RawTextHelpFormatter) 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
-                   'del', 'depri','dp','listall','lsa','listcon','lsc','rm',
+                   'del', 'depri','dp','listall','lsa','listcon','lsc',
+                   'listfile','lsf','rm',
                    'pri','p']
   parser.add_argument(dest='actions',metavar='action', 
                       choices=list_of_choices,
@@ -66,7 +67,7 @@ def main():
                       "list|ls       [TERM]\n"
                       "listall|lsa   [TERM]\n"
                       "listcon|lsc\n"
-
+                      "listfile|lsf SRC [TERM...]\n"
                       'pri|p         ITEM#  PRIORITY  \n'  )
   parser.add_argument(dest='remainingArguments',metavar='task number or description', 
                       nargs=argparse.REMAINDER,
@@ -100,6 +101,10 @@ def main():
         #turn in to a set to get uniques and then back into a list
         clist=list(set(blist))
         for x in clist: print x
+        break
+    if case('listfile','lsf'): 
+        SRC=args.remainingArguments.pop(0)  #pop the 1st item off the list as the file
+        todolib.readfile._list(SRC,args.remainingArguments)
         break
     if case('add') or case ('a'):
         print "add"
