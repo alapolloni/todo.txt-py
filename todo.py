@@ -77,6 +77,7 @@ def printx():
 
 def highlightPriority(matchobj):
   """color replacement function used when highlighting priorities"""
+  """took this from https://github.com/abztrakt/ya-todo-py """
 
   PRI_A = YELLOW
   PRI_B = LIGHT_GREEN
@@ -92,6 +93,29 @@ def highlightPriority(matchobj):
       return PRI_C + matchobj.group(0) + DEFAULT
   else:
       return PRI_X + matchobj.group(0) + DEFAULT
+
+def highlightLate(matchobj):
+    """color replacement function used when highlighting overdue items"""
+    due = date(int(matchobj.group(2)), int(matchobj.group(3)), int(matchobj.group(4)))
+    if due <= date.today():
+        return matchobj.group(1) + LATE + "{due: " + matchobj.group(2) + "-" + matchobj.group(3) + "-" \
+        	+ matchobj.group(4) + "}" + DEFAULT + matchobj.group(5)
+    else:
+        return DEFAULT + matchobj.group(0) + DEFAULT
+
+def highlightLate2(matchobj):
+    """color replacement function used when highlighting overdue items with time"""
+    due = datetime.datetime(int(matchobj.group(2)), int(matchobj.group(3)), int(matchobj.group(4)), \
+    	int(matchobj.group(5)), int(matchobj.group(6)))
+    if due <= datetime.datetime(*time.localtime()[0:5]):
+        return matchobj.group(1) + LATE + "{due: " + matchobj.group(2) + "-" + matchobj.group(3) + "-" \
+        	+ matchobj.group(4) + " " + matchobj.group(5) + ":" + matchobj.group(6) + "}" \
+        	+ DEFAULT + matchobj.group(7)
+    else:
+        return DEFAULT + matchobj.group(0) + DEFAULT
+
+
+
 
 def _list(FILE,TERMS):
   if os.path.isfile(FILE): src=FILE
@@ -124,10 +148,16 @@ def _list(FILE,TERMS):
  
   #add colors 
   re_pri = re.compile(r".*(\([A-Z]\)).*") 
+  re_late = re.compile(r"(.*)\{due: (....)-(..)-(..)\}(.*)")
+  re_late2 = re.compile(r"(.*)\{due: (....)-(..)-(..) (..):(..)\}(.*)")
+  re_anyext = re.compile(r"\{[^\}]*\}")
 
   #only after done, show the end results
-  for x in SRC:
-    print re_pri.sub(highlightPriority,x)
+  for item in SRC:
+    #print re_pri.sub(highlightPriority,x),
+    print re_late2.sub(highlightLate2, 
+                       (re_late.sub(highlightLate, 
+                                    re_pri.sub(highlightPriority, item)))),  
   print "TODO:", len(SRC), " of ", originalSRCLenth, " tasks shown"
 
 def _add(FILE,TERMS):
