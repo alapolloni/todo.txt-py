@@ -4,8 +4,6 @@
 #https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format 
 
 
-#local libs
-import todolib.readfile
 
 #standard libs
 import argparse
