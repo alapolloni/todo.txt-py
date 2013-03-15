@@ -23,6 +23,26 @@ TMP_FILE= TODO_DIR+"/todo.tmp"
 
 TODOTXT_PRESERVE_LINE_NUMBERS = 0
 
+YELLOW="FUCK"
+# ANSI Colors
+NONE         = ""
+BLACK        = "\033[0;30m"
+RED          = "\033[0;31m"
+GREEN        = "\033[0;32m"
+BROWN        = "\033[0;33m"
+BLUE         = "\033[0;34m"
+PURPLE       = "\033[0;35m"
+CYAN         = "\033[0;36m"
+LIGHT_GREY   = "\033[0;37m"
+DARK_GREY    = "\033[1;30m"
+LIGHT_RED    = "\033[1;31m"
+LIGHT_GREEN  = "\033[1;32m"
+YELLOW       = "\033[1;33m"
+LIGHT_BLUE   = "\033[1;34m"
+LIGHT_PURPLE = "\033[1;35m"
+LIGHT_CYAN   = "\033[1;36m"
+WHITE        = "\033[1;37m"
+DEFAULT      = "\033[0m"
 
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
@@ -46,6 +66,158 @@ class switch(object):
             return True
         else:
             return False
+
+def readfile():
+  f=open(r'C:\Users\aapollon\Documents\My Dropbox\TaskPaper\todo.txt','r')
+  #x=f.read()
+  #print "x"+x
+  return f.read()
+
+def printx():
+  print readfile()
+  return
+
+def highlightPriority(matchobj):
+  """color replacement function used when highlighting priorities"""
+
+  PRI_A = YELLOW
+  PRI_B = LIGHT_GREEN
+  PRI_C = LIGHT_PURPLE
+  PRI_X = WHITE
+  LATE  = LIGHT_RED
+
+  if (matchobj.group(1) == "(A)"):
+      return PRI_A + matchobj.group(0) + DEFAULT
+  elif (matchobj.group(1) == "(B)"):
+      return PRI_B + matchobj.group(0) + DEFAULT
+  elif (matchobj.group(1) == "(C)"):
+      return PRI_C + matchobj.group(0) + DEFAULT
+  else:
+      return PRI_X + matchobj.group(0) + DEFAULT
+
+def _list(FILE,TERMS):
+  if os.path.isfile(FILE): src=FILE
+  elif os.path.isfile(FILE): src=FILE
+  else: sys.exit("TODO: File"+FILE+"does not exit")
+    
+  f=open(FILE,'r')
+  SRC=f.readlines()
+
+  ## Figure out how much padding we need to use
+  ## We need one level of padding for each power of 10 $LINES uses
+  LINES=len(SRC)
+  PADDING=len(str(LINES))
+  ## and add line numbers to the SRC
+  for x in range(len(SRC)):
+    #SRC[x]=str(x+1)+" "*PADDING+SRC[x]
+    SRC[x]=str(x+1).zfill(PADDING)+" "+SRC[x]
+
+  originalSRCLenth=len(SRC) 
+
+  #each time through the FOR loop cuts down SRC
+  for TERM in TERMS:
+    if re.match('-',TERM): 
+      TERM=TERM[1:]
+      print "return all without TERM:"+TERM
+      SRC = filter (lambda a: not re.search(re.escape(TERM),a), SRC)
+    else:
+      print "return all with TERM:"+TERM
+      SRC = filter (lambda a: re.search(re.escape(TERM),a), SRC)
+ 
+  #add colors 
+  re_pri = re.compile(r".*(\([A-Z]\)).*") 
+
+  #only after done, show the end results
+  for x in SRC:
+    print re_pri.sub(highlightPriority,x)
+  print "TODO:", len(SRC), " of ", originalSRCLenth, " tasks shown"
+
+def _add(FILE,TERMS):
+  print "FILE:",FILE
+  print "TERMS:",TERMS
+  _addto(FILE,TERMS)
+
+def _addto(FILE,TERMS):
+  #TERMS needs to end up as one string
+  print "FILE:",FILE
+  print "TERMS:",TERMS
+ 
+  input= " ".join(TERMS)
+  input= "\n"+input
+  print "input:",input
+  with open(FILE, "ab") as fwrite:
+    fwrite.write(input)
+    fwrite.close()
+
+def _append(FILE,itemNum,TERMS):
+  #print "FILE:",FILE
+  #print "itemNum:",itemNum
+  #print "TERMS:",TERMS
+ 
+  input= " ".join(TERMS)
+  #print "input:",input
+
+  with open(FILE, "r") as source:
+    lines = source.readlines()
+  with open(FILE, "wb") as source:
+    lineCount=0
+    for line in lines:
+        lineCount += 1
+        #print lineCount," ",line,
+        if lineCount != itemNum: 
+          #print "not it, write the line"
+          source.write(line)
+        else:
+          #source.write(re.sub(r'^# deb', 'deb', line))
+          #print "append to the line"
+          line=line.rstrip('\n')+" "+input+'\n'
+          #print "line ",line
+          source.write(line)
+ 
+def _archive(TODO,DONE):
+  completedLines=[]
+  todoLines=[]
+  for line in open(TODO,'rb'):
+    line=line.rstrip()
+    if line: #else, removes empty lines
+      if re.match('x',line,re.IGNORECASE):
+        completedLines.append(re.sub('^[Xx]','',line))
+      else:
+        todoLines.append(line)
+  fTODO=open(TODO,'wb')
+  for item in todoLines:
+    fTODO.write("%s\n" % item)
+  fDONE=open(DONE,'ab')
+  if len(completedLines):#yes, there are completed lines so append to the done.txt"
+    for item in completedLines:
+     fDONE.write("%s\n" % item)
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def main():
   parser = argparse.ArgumentParser(description='Process some todos.',
@@ -76,20 +248,15 @@ def main():
   print "actions:",args.actions
   print "args_remaintintAarguments",args.remainingArguments
 
-  #action={args.actions:None}
-  #print "action ",action
-
-  #sys.exit("bye")
-
   for case in switch(args.actions):
     if case('list') or case ('ls'):
         print "list"
-        todolib.readfile._list(TODO_FILE,args.remainingArguments)
-        #todolib.readfile.printx()
+        _list(TODO_FILE,args.remainingArguments)
+        #printx()
         break
     if case('listall','lsa'): 
-        todolib.readfile._list(TODO_FILE,args.remainingArguments)
-        todolib.readfile._list(DONE_FILE,args.remainingArguments)
+        _list(TODO_FILE,args.remainingArguments)
+        _list(DONE_FILE,args.remainingArguments)
         break
     if case('listcon','lsc'): 
         with open(TODO_FILE, "r") as source:
@@ -104,7 +271,7 @@ def main():
         break
     if case('listfile','lsf'): 
         SRC=args.remainingArguments.pop(0)  #pop the 1st item off the list as the file
-        todolib.readfile._list(SRC,args.remainingArguments)
+        _list(SRC,args.remainingArguments)
         break    
     if case('listpri','lsp'):
         if len(args.remainingArguments) > 0 :
@@ -121,11 +288,11 @@ def main():
           print "error: this doesn't do what you think it should"
           break
         listPRI=[ '('+PRI+')' ]
-        todolib.readfile._list(TODO_FILE,listPRI)
+        _list(TODO_FILE,listPRI)
         break    
     if case('add') or case ('a'):
         print "add"
-        todolib.readfile._add(TODO_FILE,args.remainingArguments)
+        _add(TODO_FILE,args.remainingArguments)
         break
     if case('addto'):
         print "addto"
@@ -134,7 +301,7 @@ def main():
         print "args_remaintintAarguments",args.remainingArguments
 
         if os.path.isfile(destfile):
-          todolib.readfile._addto(destfile,args.remainingArguments)
+          _addto(destfile,args.remainingArguments)
         else:
           msg =  "TODO: Destination file " + destfile + " does not exist"
           sys.exit(msg)
@@ -143,7 +310,7 @@ def main():
         #TODO : figure this out on a unix box i guess
         print "addm not supported in windows"
     if case('archive'):
-        todolib.readfile._archive(TODO_FILE,DONE_FILE)
+        _archive(TODO_FILE,DONE_FILE)
         break
     if case('do'):
         print "do"
@@ -204,7 +371,7 @@ def main():
     if case('append','app'): 
       item = int(args.remainingArguments.pop(0))
       print item
-      todolib.readfile._append(TODO_FILE,item,args.remainingArguments)
+      _append(TODO_FILE,item,args.remainingArguments)
       break
     if case('pri','p'): # default, could also just omit condition or 'if True'
       ITEMNUM=int(args.remainingArguments.pop(0))  #pop the 1st item off the list as the file
