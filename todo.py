@@ -11,9 +11,10 @@ import argparse
 import sys
 import os
 import re
+import datetime
 
-print os.environ['HOME']
-TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
+TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
+#TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
 TODO_FILE=TODO_DIR+"/todo.txt"
 DONE_FILE=TODO_DIR+"/done.txt"
 REPORT_FILE=TODO_DIR+"/report.txt"
@@ -113,9 +114,6 @@ def highlightLate2(matchobj):
         	+ DEFAULT + matchobj.group(7)
     else:
         return DEFAULT + matchobj.group(0) + DEFAULT
-
-
-
 
 def _list(FILE,TERMS):
   if os.path.isfile(FILE): src=FILE
@@ -273,14 +271,12 @@ def main():
                       nargs=argparse.REMAINDER,
                       help="remaining args help")
   args=parser.parse_args()
-  print "actions:",args.actions
-  print "args_remaintintAarguments",args.remainingArguments
+  #print "actions:",args.actions
+  #print "args_remaintintAarguments",args.remainingArguments
 
   for case in switch(args.actions):
     if case('list') or case ('ls'):
-        print "list"
         _list(TODO_FILE,args.remainingArguments)
-        #printx()
         break
     if case('listall','lsa'): 
         _list(TODO_FILE,args.remainingArguments)
@@ -341,32 +337,27 @@ def main():
         _archive(TODO_FILE,DONE_FILE)
         break
     if case('do'):
-        print "do"
+        with open(TODO_FILE, "r") as source:
+          lines = source.readlines()
+
         for itemNum in args.remainingArguments:
           print "item:"+itemNum
           itemNum.replace(',','')  #if comma separated remove the comma,
-          itemNum=int(itemNum)
-          with open(TODO_FILE, "r") as source:
-              lines = source.readlines()
-          with open(TODO_FILE, "w") as source:
-              lineCount=0
-              for line in lines:
-                  lineCount += 1
-                  print lineCount," ",line,
-                  if lineCount != itemNum: 
-                    print "not it, write the line"
-                    source.write(line)
-                  elif re.match('^X',line, re.IGNORECASE):
-                    print itemNum," is already marked as done"
-                    source.write(line)
-                  else:
-                    #source.write(re.sub(r'^# deb', 'deb', line))
-                    print "do the line"
-                    line="X "+line
-                    line=re.sub(r'\(.\)','',line)
-                    print "line ",line
-                    source.write(line)
-                    #TODO archive if set as default
+          itemNum=(int(itemNum)-1)
+
+          #completed must be a lower case x
+          if re.match('^x',lines[itemNum]):
+            print itemNum+1," ",lines[itemNum]," is already marked as done"
+          elif itemNum <0:
+            print itemNum+1," is less then 1"
+          else:
+            lines[itemNum]="x "+ datetime.date.today().strftime('%Y-%m-%d ') \
+                            + lines[itemNum]
+            lines[itemNum]=re.sub(r'\(.\)','',lines[itemNum])
+            #TODO archive if set as default
+
+        with open(TODO_FILE, "wb") as file:
+          file.writelines(lines)
         break
     if case('del','rm'):
         #print "delete"
