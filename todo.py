@@ -266,6 +266,7 @@ def main():
                       "listall|lsa   [TERM]\n"
                       "listcon|lsc\n"
                       "listfile|lsf SRC [TERM...]\n"
+                      'listpri|lsp  [PRIORITY]\n'
                       'pri|p         ITEM#  PRIORITY  \n'  )
   parser.add_argument(dest='remainingArguments',metavar='task number or description', 
                       nargs=argparse.REMAINDER,
@@ -302,6 +303,8 @@ def main():
           PRI= args.remainingArguments.pop(0)
           if re.match('[A-Z|a-z]',PRI):
             PRI= PRI.upper()
+            listPRI=[ '('+PRI+')' ]
+            _list(TODO_FILE,listPRI)
           else:
             print 'usage: todo.sh listpri ITEM# PRIORITY\nnote: PRIORITY must be anywhere from A to Z.'
             break
@@ -309,10 +312,15 @@ def main():
           PRI='.'
           #TODO dont know how to fix this since _list does an escape on the TERM
           #and in this case, we don't want that.  this seems to be the ONLY case.
+          #options
+          #1, just cycle through the priorities...
+          #2, do it yourself this one time
+          #3, rething the escape...
           print "error: this doesn't do what you think it should"
+          for i in range(ord('a'),ord('z')+1): 
+            listPRI=[ '('+chr(i).upper()+')' ]
+            _list(TODO_FILE,listPRI)
           break
-        listPRI=[ '('+PRI+')' ]
-        _list(TODO_FILE,listPRI)
         break    
     if case('add') or case ('a'):
         print "add"
