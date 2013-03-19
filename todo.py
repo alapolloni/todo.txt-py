@@ -250,7 +250,8 @@ def main():
                                    formatter_class=argparse.RawTextHelpFormatter) 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del', 'depri','dp','listall','lsa','listcon','lsc',
-                   'listfile','lsf','listpri','lsp','rm',
+                   'listfile','lsf','listpri','lsp','listproj','lsprj', 
+                   'rm',
                    'pri','p']
   parser.add_argument(dest='actions',metavar='action', 
                       choices=list_of_choices,
@@ -267,6 +268,7 @@ def main():
                       "listcon|lsc\n"
                       "listfile|lsf SRC [TERM...]\n"
                       'listpri|lsp  [PRIORITY]\n'
+                      'listproj|lsprj\n'
                       'pri|p         ITEM#  PRIORITY  \n'  )
   parser.add_argument(dest='remainingArguments',metavar='task number or description', 
                       nargs=argparse.REMAINDER,
@@ -322,6 +324,17 @@ def main():
             _list(TODO_FILE,listPRI)
           break
         break    
+    if case('listproj','lsprj'):
+      with open(TODO_FILE, "r") as source:
+        lines = source.readlines()
+      #find all the projects and return them.  you get lists of lists
+      alist=[re.findall('(\+\w+)[\s|\\n]',l) for l in lines]
+      #squash the lists
+      blist=[item for sublist in alist for item in sublist]
+      #turn in to a set to get uniques and then back into a list
+      clist=list(set(blist))
+      for x in clist: print x
+      break
     if case('add') or case ('a'):
         print "add"
         _add(TODO_FILE,args.remainingArguments)
