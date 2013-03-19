@@ -20,9 +20,11 @@ DONE_FILE=TODO_DIR+"/done.txt"
 REPORT_FILE=TODO_DIR+"/report.txt"
 TMP_FILE= TODO_DIR+"/todo.tmp"
 
-TODOTXT_PRESERVE_LINE_NUMBERS = 0
+TODOTXT_PRESERVE_LINE_NUMBERS = 1
+TODOTXT_VERBOSE = 1
+TODOTXT_FORCE = 0 
 
-YELLOW="FUCK"
+
 # ANSI Colors
 NONE         = ""
 BLACK        = "\033[0;30m"
@@ -223,36 +225,13 @@ def _archive(TODO,DONE):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def main():
   parser = argparse.ArgumentParser(description='Process some todos.',
                                    formatter_class=argparse.RawTextHelpFormatter) 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
-                   'del', 'depri','dp','listall','lsa','listcon','lsc',
+                   'del','rm','depri','dp','listall','lsa','listcon','lsc',
                    'listfile','lsf','listpri','lsp','listproj','lsprj', 
-                   'rm',
-                   'pri','p']
+                   'move','mv',           'pri','p']
   parser.add_argument(dest='actions',metavar='action', 
                       choices=list_of_choices,
                       help= 
@@ -269,6 +248,7 @@ def main():
                       "listfile|lsf SRC [TERM...]\n"
                       'listpri|lsp  [PRIORITY]\n'
                       'listproj|lsprj\n'
+                      'move|mv ITEM# DEST [SRC]\n'
                       'pri|p         ITEM#  PRIORITY  \n'  )
   parser.add_argument(dest='remainingArguments',metavar='task number or description', 
                       nargs=argparse.REMAINDER,
@@ -334,6 +314,52 @@ def main():
       #turn in to a set to get uniques and then back into a list
       clist=list(set(blist))
       for x in clist: print x
+      break
+    if case('move','mv'):
+      # replace moved line with a blank line when TODOTXT_PRESERVE_LINE_NUMBERS is 1
+      errmsg="usage: TODO mv ITEM# DEST [SRC]"
+      if len(args.remainingArguments) > 0 : 
+        itemNum = args.remainingArguments.pop(0)
+      else: print errmsg;break
+      if len(args.remainingArguments) > 0 : 
+        dest=TODO_DIR +"/"+  args.remainingArguments.pop(0)
+      else: print errmsg;break
+      if len(args.remainingArguments) > 0 : 
+        src =TODO_DIR +"/"+  args.remainingArguments.pop(0)
+      else: src=TODO_FILE
+
+      if not os.path.isfile(dest): sys.exit("TODO: Destination file "+dest+" does not exist") 
+      if not os.path.isfile(src): sys.exit("TODO: Destination file "+src+" does not exist") 
+
+      if re.match('(\d+)',itemNum):
+        itemNum=int(itemNum)-1
+      else:
+        sys.exit(errmsg) 
+
+      with open(src, "r") as source:
+        lines = source.readlines()
+      if (len(lines)<itemNum): 
+        sys.exit( '{0}:No such item in {1}'.format(itemNum+1, src))
+
+      question = 'Move {0} from {1} to {2}? (Y/n)'.format(lines[itemNum],src,dest)
+      if TODOTXT_FORCE == 0:
+        answer = raw_input(question)
+      else:
+        answer = 'Y'
+
+      if answer == 'Y': 
+        if TODOTXT_PRESERVE_LINE_NUMBERS == 0:
+          #delete line numbers
+          line=[]
+          line.append(lines.pop(itemNum).strip('\n'))
+        else:
+          #preserve lines numbers
+          line=[]
+          line.append(lines[itemNum].strip('\n'))
+          lines[itemNum]='\n'
+        _add(dest,line)
+        with open(src, "wb") as file:
+          file.writelines(lines)
       break
     if case('add') or case ('a'):
         print "add"
