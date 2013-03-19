@@ -209,7 +209,7 @@ def _archive(TODO,DONE):
     line=line.rstrip()
     if line: #else, removes empty lines
       if re.match('x',line,re.IGNORECASE):
-        completedLines.append(re.sub('^[Xx]','',line))
+        completedLines.append(line)
       else:
         todoLines.append(line)
   fTODO=open(TODO,'wb')
@@ -219,11 +219,6 @@ def _archive(TODO,DONE):
   if len(completedLines):#yes, there are completed lines so append to the done.txt"
     for item in completedLines:
      fDONE.write("%s\n" % item)
-
-  
-
-
-
 
 def main():
   parser = argparse.ArgumentParser(description='Process some todos.',
