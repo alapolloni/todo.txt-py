@@ -13,8 +13,8 @@ import os
 import re
 import datetime
 
-TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
-#TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
+#TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
+TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
 TODO_FILE=TODO_DIR+"/todo.txt"
 DONE_FILE=TODO_DIR+"/done.txt"
 REPORT_FILE=TODO_DIR+"/report.txt"
@@ -226,7 +226,7 @@ def main():
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del','rm','depri','dp','listall','lsa','listcon','lsc',
                    'listfile','lsf','listpri','lsp','listproj','lsprj', 
-                   'move','mv',           'pri','p']
+                   'move','mv','prepend','prep','pri','replace','p']
   parser.add_argument(dest='actions',metavar='action', 
                       choices=list_of_choices,
                       help= 
@@ -244,7 +244,9 @@ def main():
                       'listpri|lsp  [PRIORITY]\n'
                       'listproj|lsprj\n'
                       'move|mv ITEM# DEST [SRC]\n'
-                      'pri|p         ITEM#  PRIORITY  \n'  )
+                      'prepend|prep ITEM# "TEXT TO PREPEND"\n'
+                      'replace ITEM# "TEXT TO REPLACE"\n'
+                      'pri|p ITEM#  PRIORITY  \n'  )
   parser.add_argument(dest='remainingArguments',metavar='task number or description', 
                       nargs=argparse.REMAINDER,
                       help="remaining args help")
@@ -356,7 +358,50 @@ def main():
         with open(src, "wb") as file:
           file.writelines(lines)
       break
-    if case('add') or case ('a'):
+    if case('prepend','prep','replace'):
+      action = args.actions
+      itemNum = args.remainingArguments.pop(0)  #pop the 1st item off the list as the file
+      if re.match('\d+',itemNum):
+        itemNum=int(itemNum)-1 #convert to list index
+      else:
+        sys.exit ("Error: need ITEM#")
+      TEXT = " ".join(args.remainingArguments)
+      with open(TODO_FILE, "r") as source:
+        lines = source.readlines()
+      TODO=lines[itemNum]
+
+      # Retrieve existing priority and prepended date
+      mTODO=re.search('(\([A-Z]\) ){0,1}(\d{4}-\d{2}-\d{2}){0,1}(.*)',TODO)
+      if mTODO.group(1) is None:
+        priority=''
+      else:
+        priority=mTODO.group(1)
+      #prepdate=mTODO.group(2)
+      # If the replaced text starts with a date, it will replace the existing
+      # date, too.
+      nTEXT=re.search('(\d{4}-\d{2}-\d{2}){0,1}(.*)',TEXT)
+      if mTODO.group(2) is None or nTEXT.group(1) is not None:
+        prepdate=''
+      else:
+        prepdate=mTODO.group(2)+" "
+      if action == 'replace': 
+        itemText=TEXT
+      else:
+        itemText=TEXT+" "+mTODO.group(3)
+
+      newTEXT="{0}{1}{2}\n".format(priority,prepdate,itemText)
+      if TODOTXT_VERBOSE == 1:
+        print "{0} {1}".format(str(itemNum+1),TODO)
+        print "TODO: Replaced task with"
+        print "{0} {1}".format(str(itemNum+1),newTEXT)
+
+      lines[itemNum]=newTEXT
+
+      with open(TODO_FILE, "wb") as file:
+        file.writelines(lines)
+
+      break
+    if case('add','a'):
         print "add"
         _add(TODO_FILE,args.remainingArguments)
         break
