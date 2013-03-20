@@ -3,13 +3,6 @@
 #format rules
 #https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format 
 
-
-#TODO
-#all the options 
-#environment variables
-#
-
-
 #standard libs
 import argparse
 #from argparse import RawTextHelpFormatter
@@ -18,8 +11,8 @@ import os
 import re
 import datetime
 
-#TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
-TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
+TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
+#TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
 TODO_FILE=TODO_DIR+"/todo.txt"
 DONE_FILE=TODO_DIR+"/done.txt"
 REPORT_FILE=TODO_DIR+"/report.txt"
@@ -28,7 +21,6 @@ TMP_FILE= TODO_DIR+"/todo.tmp"
 TODOTXT_PRESERVE_LINE_NUMBERS = 1
 TODOTXT_VERBOSE = 1
 TODOTXT_FORCE = 0 
-
 
 # ANSI Colors
 NONE         = ""
