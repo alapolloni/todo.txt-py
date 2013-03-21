@@ -168,7 +168,9 @@ def _addto(FILE,TERMS):
   print "TERMS:",TERMS
  
   input= " ".join(TERMS)
-  input= "\n"+input
+  input= datetime.date.today().strftime('%Y-%m-%d ')+input+"\n"
+  #input= "\n"+datetime.date.today().strftime('%Y-%m-%d ')+input+"\n"
+  #input= datetime.date.today().strftime('%Y-%m-%d ')+" "+input
   print "input:",input
   with open(FILE, "ab") as fwrite:
     fwrite.write(input)
