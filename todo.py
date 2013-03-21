@@ -164,14 +164,8 @@ def _add(FILE,TERMS):
 
 def _addto(FILE,TERMS):
   #TERMS needs to end up as one string
-  print "FILE:",FILE
-  print "TERMS:",TERMS
- 
   input= " ".join(TERMS)
   input= datetime.date.today().strftime('%Y-%m-%d ')+input+"\n"
-  #input= "\n"+datetime.date.today().strftime('%Y-%m-%d ')+input+"\n"
-  #input= datetime.date.today().strftime('%Y-%m-%d ')+" "+input
-  print "input:",input
   with open(FILE, "ab") as fwrite:
     fwrite.write(input)
     fwrite.close()
