@@ -446,14 +446,10 @@ def main():
           file.writelines(lines)
         break
     if case('del','rm'):
-        #print "delete"
-        #print "TODO_FILE:",TODO_FILE
         linesDeleted=0
         with open(TODO_FILE, "r") as source:
           lines = source.readlines()
         for itemNum in args.remainingArguments:
-          #print "item:"+itemNum
-          print "lines:",lines
           itemNum.replace(',','')  #if comma separated remove the comma,
           itemNum=int(itemNum)
           itemNum -= 1 #to match list index numbering
