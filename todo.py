@@ -10,6 +10,7 @@ import sys
 import os
 import re
 import datetime
+from datetime import date
 
 #TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
 TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
@@ -21,6 +22,35 @@ TMP_FILE= TODO_DIR+"/todo.tmp"
 TODOTXT_PRESERVE_LINE_NUMBERS = 1
 TODOTXT_VERBOSE = 1
 TODOTXT_FORCE = 0 
+
+# defaults if not yet defined
+# from TODO.sh
+#TODOTXT_VERBOSE=${TODOTXT_VERBOSE:-1}
+try: TODOTXT_VERBOSE
+except: TODOTXT_VERBOSE = 1
+try: TODOTXT_PLAIN
+except: TODOTXT_PLAIN = 0
+try: TODOTXT_CFG_FILE
+except: 
+  TODO_DIR=os.environ['HOME']+'/.todo/config'
+  #TODOTXT_CFG_FILE = $HOME/.todo/config #TODO
+  #TODOTXT_CFG_FILE = $HOME/.todo/config #TODO
+try: TODOTXT_FORCE
+except: TODOTXT_FORCE = 0
+try: TODOTXT_PRESERVE_LINE_NUMBERS
+except: TODOTXT_PRESERVE_LINE_NUMBERS = 1
+try: TODOTXT_AUTO_ARCHIVE
+except: TODOTXT_AUTO_ARCHIVE = 1
+try: TODOTXT_DATE_ON_ADD
+except: TODOTXT_DATE_ON_ADD = 0
+try: TODOTXT_DEFAULT_ACTION
+except: TODOTXT_DEFAULT_ACTION=None #TODO
+try: TODOTXT_SORT_COMMAND
+except: TODOTXT_SORT_COMMAND=None #TODO
+try: TODOTXT_FINAL_FILTER
+except: TODOTXT_FINAL_FILTER=None #TODO
+
+print TODO_DIR
 
 # ANSI Colors
 NONE         = ""
@@ -79,6 +109,7 @@ def highlightPriority(matchobj):
   PRI_C = LIGHT_PURPLE
   PRI_X = WHITE
   LATE  = LIGHT_RED
+  COLOR_DONE = LIGHT_GREY
 
   if (matchobj.group(1) == "(A)"):
       return PRI_A + matchobj.group(0) + DEFAULT
@@ -91,20 +122,22 @@ def highlightPriority(matchobj):
 
 def highlightLate(matchobj):
     """color replacement function used when highlighting overdue items"""
+    LATE  = LIGHT_RED
     due = date(int(matchobj.group(2)), int(matchobj.group(3)), int(matchobj.group(4)))
     if due <= date.today():
-        return matchobj.group(1) + LATE + "{due: " + matchobj.group(2) + "-" + matchobj.group(3) + "-" \
-        	+ matchobj.group(4) + "}" + DEFAULT + matchobj.group(5)
+        return matchobj.group(1) + LATE + "due:" + matchobj.group(2) + "-" + matchobj.group(3) + "-" \
+        	+ matchobj.group(4) + DEFAULT + matchobj.group(5)
     else:
         return DEFAULT + matchobj.group(0) + DEFAULT
 
 def highlightLate2(matchobj):
     """color replacement function used when highlighting overdue items with time"""
+    LATE  = LIGHT_RED
     due = datetime.datetime(int(matchobj.group(2)), int(matchobj.group(3)), int(matchobj.group(4)), \
     	int(matchobj.group(5)), int(matchobj.group(6)))
     if due <= datetime.datetime(*time.localtime()[0:5]):
-        return matchobj.group(1) + LATE + "{due: " + matchobj.group(2) + "-" + matchobj.group(3) + "-" \
-        	+ matchobj.group(4) + " " + matchobj.group(5) + ":" + matchobj.group(6) + "}" \
+        return matchobj.group(1) + LATE + "due:" + matchobj.group(2) + "-" + matchobj.group(3) + "-" \
+        	+ matchobj.group(4) + " " + matchobj.group(5) + ":" + matchobj.group(6) \
         	+ DEFAULT + matchobj.group(7)
     else:
         return DEFAULT + matchobj.group(0) + DEFAULT
@@ -140,8 +173,10 @@ def _list(FILE,TERMS):
  
   #add colors 
   re_pri = re.compile(r".*(\([A-Z]\)).*") 
-  re_late = re.compile(r"(.*)\{due: (....)-(..)-(..)\}(.*)")
-  re_late2 = re.compile(r"(.*)\{due: (....)-(..)-(..) (..):(..)\}(.*)")
+  #re_late = re.compile(r"(.*)\{due: (....)-(..)-(..)\}(.*)")
+  re_late = re.compile(r"(.*)due:(....)-(..)-(..)(.*)")
+  #re_late2 = re.compile(r"(.*)\{due: (....)-(..)-(..) (..):(..)\}(.*)")
+  re_late2 = re.compile(r"(.*)due: (....)-(..)-(..) (..):(..)(.*)")
   re_anyext = re.compile(r"\{[^\}]*\}")
 
   #only after done, show the end results
