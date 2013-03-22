@@ -142,6 +142,10 @@ def highlightLate2(matchobj):
     else:
         return DEFAULT + matchobj.group(0) + DEFAULT
 
+def highLightDone(matchobj):
+  COLOR_DONE = DARK_GREY
+  return COLOR_DONE + matchobj.group(0) + DEFAULT
+
 def _list(FILE,TERMS):
   if os.path.isfile(FILE): src=FILE
   elif os.path.isfile(FILE): src=FILE
@@ -173,18 +177,17 @@ def _list(FILE,TERMS):
  
   #add colors 
   re_pri = re.compile(r".*(\([A-Z]\)).*") 
-  #re_late = re.compile(r"(.*)\{due: (....)-(..)-(..)\}(.*)")
   re_late = re.compile(r"(.*)due:(....)-(..)-(..)(.*)")
-  #re_late2 = re.compile(r"(.*)\{due: (....)-(..)-(..) (..):(..)\}(.*)")
   re_late2 = re.compile(r"(.*)due: (....)-(..)-(..) (..):(..)(.*)")
   re_anyext = re.compile(r"\{[^\}]*\}")
-
+  re_done = re.compile(r"(^\d+ x .*)")  #need the digit at the beginning cause you shoved in above
   #only after done, show the end results
   for item in SRC:
-    #print re_pri.sub(highlightPriority,x),
-    print re_late2.sub(highlightLate2, 
+    print re_done.sub(highLightDone, 
+                  (re_late2.sub(highlightLate2, 
                        (re_late.sub(highlightLate, 
-                                    re_pri.sub(highlightPriority, item)))),  
+                                    re_pri.sub(highlightPriority, item)))))),  
+
   print "TODO:", len(SRC), " of ", originalSRCLenth, " tasks shown"
 
 def _add(FILE,TERMS):
