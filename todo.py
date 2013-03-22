@@ -11,8 +11,8 @@ import os
 import re
 import datetime
 
-TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
-#TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
+#TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
+TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
 TODO_FILE=TODO_DIR+"/todo.txt"
 DONE_FILE=TODO_DIR+"/done.txt"
 REPORT_FILE=TODO_DIR+"/report.txt"
@@ -65,15 +65,10 @@ class switch(object):
         else:
             return False
 
-def readfile():
-  f=open(r'C:\Users\aapollon\Documents\My Dropbox\TaskPaper\todo.txt','r')
-  #x=f.read()
-  #print "x"+x
-  return f.read()
-
-def printx():
-  print readfile()
-  return
+def readFileToLines(FILE):
+  with open(FILE,'r') as f:
+    lines=f.readlines()
+  return lines
 
 def highlightPriority(matchobj):
   """color replacement function used when highlighting priorities"""
@@ -217,7 +212,7 @@ def main():
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del','rm','depri','dp','help','listall','lsa','listcon','lsc',
                    'listfile','lsf','listpri','lsp','listproj','lsprj', 
-                   'move','mv','prepend','prep','pri','replace','p']
+                   'move','mv','prepend','prep','pri','replace','p','test']
   parser.add_argument(dest='actions',metavar='action', 
                       choices=list_of_choices,
                       help= 
@@ -499,6 +494,11 @@ def main():
         print "TODO: ", ITEMNUM+1," deprioritized"
       with open(TODO_FILE, "wb") as file:
         file.writelines(lines)
+      break
+    if case('test'):
+      lines=readFileToLines(TODO_FILE)  
+      print "lines:",
+      print lines
       break
     if case('help'):
       #TODO oneline_usage 
