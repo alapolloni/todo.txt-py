@@ -466,14 +466,24 @@ def main():
       _append(TODO_FILE,item,args.remainingArguments)
       break
     if case('pri','p'): # default, could also just omit condition or 'if True'
-      ITEMNUM=int(args.remainingArguments.pop(0))  #pop the 1st item off the list as the file
-      ITEMNUM -=1 #decrement to match list index, starts with zero
+      errmsg= 'usage: todo.sh pri ITEM# PRIORITY\n'
+      ITEMNUM=args.remainingArguments.pop(0)  #pop the 1st item off the list as the file
+      if re.match('\d+',ITEMNUM):  #is it an really a number ?
+        ITEMNUM=int(ITEMNUM)  #pop the 1st item off the list as the file
+        ITEMNUM -=1 #decrement to match list index, starts with zero
+      else:
+        sys.exit(errmsg+"note: ITEM# must be a number")
       PRIORITY=args.remainingArguments.pop(0)  #pop the 1st item off the list as the file
       if not re.match('[A-Z]',PRIORITY):
-        print 'usage: todo.sh pri ITEM# PRIORITY\nnote: PRIORITY must be anywhere from A to Z.'
+        sys.exit(errmsg+"note: PRIORITY must be anywhere from A to Z.")
         break
+
       with open(TODO_FILE, "r") as source:
         lines = source.readlines()
+    
+      if (ITEMNUM < 0) or (ITEMNUM+1 > len(lines)):
+        sys.exit(errmsg+"ITEM# needs to be equal to a line#")
+
       #get rid of the current Priority
       lines[ITEMNUM]=re.sub('^\(.\)','',lines[ITEMNUM])
       #add the new priority 
