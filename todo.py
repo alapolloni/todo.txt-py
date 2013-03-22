@@ -424,7 +424,6 @@ def main():
           lines = source.readlines()
 
         for itemNum in args.remainingArguments:
-          print "item:"+itemNum
           itemNum.replace(',','')  #if comma separated remove the comma,
           itemNum=(int(itemNum)-1)
 
