@@ -158,8 +158,6 @@ def _list(FILE,TERMS):
   print "TODO:", len(SRC), " of ", originalSRCLenth, " tasks shown"
 
 def _add(FILE,TERMS):
-  print "FILE:",FILE
-  print "TERMS:",TERMS
   _addto(FILE,TERMS)
 
 def _addto(FILE,TERMS):
@@ -401,7 +399,6 @@ def main():
 
       break
     if case('add','a'):
-        print "add"
         _add(TODO_FILE,args.remainingArguments)
         break
     if case('addto'):
