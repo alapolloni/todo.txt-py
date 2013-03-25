@@ -25,7 +25,6 @@ TODOTXT_FORCE = 0
 
 # defaults if not yet defined
 # from TODO.sh
-#TODOTXT_VERBOSE=${TODOTXT_VERBOSE:-1}
 try: TODOTXT_VERBOSE
 except: TODOTXT_VERBOSE = 1
 try: TODOTXT_PLAIN
@@ -33,8 +32,6 @@ except: TODOTXT_PLAIN = 0
 try: TODOTXT_CFG_FILE
 except: 
   TODOTXT_CFG_FILE=os.environ['HOME']+'/.todo/config'
-  #TODOTXT_CFG_FILE = $HOME/.todo/config #TODO
-  #TODOTXT_CFG_FILE = $HOME/.todo/config #TODO
 try: TODOTXT_FORCE
 except: TODOTXT_FORCE = 0
 try: TODOTXT_PRESERVE_LINE_NUMBERS
@@ -49,8 +46,6 @@ try: TODOTXT_SORT_COMMAND
 except: TODOTXT_SORT_COMMAND=None #TODO
 try: TODOTXT_FINAL_FILTER
 except: TODOTXT_FINAL_FILTER=None #TODO
-
-print TODO_DIR
 
 # ANSI Colors
 NONE         = ""
@@ -72,6 +67,7 @@ LIGHT_CYAN   = "\033[1;36m"
 WHITE        = "\033[1;37m"
 DEFAULT      = "\033[0m"
 
+# we want a case statement
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
 # once, no need to muck around with its internals.
@@ -95,6 +91,7 @@ class switch(object):
         else:
             return False
 
+#TODO replace all of the readlines to call this function
 def readFileToLines(FILE):
   with open(FILE,'r') as f:
     lines=f.readlines()
@@ -108,8 +105,6 @@ def highlightPriority(matchobj):
   PRI_B = LIGHT_GREEN
   PRI_C = LIGHT_PURPLE
   PRI_X = WHITE
-  LATE  = LIGHT_RED
-  COLOR_DONE = LIGHT_GREY
 
   if (matchobj.group(1) == "(A)"):
       return PRI_A + matchobj.group(0) + DEFAULT
