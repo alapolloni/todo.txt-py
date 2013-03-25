@@ -12,8 +12,8 @@ import re
 import datetime
 from datetime import date
 
-#TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
-TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
+TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
+#TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
 TODO_FILE=TODO_DIR+"/todo.txt"
 DONE_FILE=TODO_DIR+"/done.txt"
 REPORT_FILE=TODO_DIR+"/report.txt"
@@ -32,7 +32,7 @@ try: TODOTXT_PLAIN
 except: TODOTXT_PLAIN = 0
 try: TODOTXT_CFG_FILE
 except: 
-  TODO_DIR=os.environ['HOME']+'/.todo/config'
+  TODOTXT_CFG_FILE=os.environ['HOME']+'/.todo/config'
   #TODOTXT_CFG_FILE = $HOME/.todo/config #TODO
   #TODOTXT_CFG_FILE = $HOME/.todo/config #TODO
 try: TODOTXT_FORCE
