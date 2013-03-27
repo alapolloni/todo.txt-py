@@ -11,6 +11,8 @@ import os
 import re
 import datetime
 from datetime import date
+from ConfigParser import ConfigParser    
+
 
 TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
 #TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
@@ -22,8 +24,13 @@ TMP_FILE= TODO_DIR+"/todo.tmp"
 TODOTXT_PRESERVE_LINE_NUMBERS = 1
 TODOTXT_VERBOSE = 1
 TODOTXT_FORCE = 0 
+TODOTXT_AUTO_ARCHIVE = 0 
+TODOTXT_CFG_FILE=r"C:\Users\aapollon\Documents\GitHub\todo.txt-py\.config"
 
-# defaults if not yet defined
+print "TMP_FILE",TMP_FILE
+
+# defaults if not yet defined, 
+# why would they be defined? hmm...?
 # from TODO.sh
 try: TODOTXT_VERBOSE
 except: TODOTXT_VERBOSE = 1
@@ -37,7 +44,7 @@ except: TODOTXT_FORCE = 0
 try: TODOTXT_PRESERVE_LINE_NUMBERS
 except: TODOTXT_PRESERVE_LINE_NUMBERS = 1
 try: TODOTXT_AUTO_ARCHIVE
-except: TODOTXT_AUTO_ARCHIVE = 1
+except: TODOTXT_AUTO_ARCHIVE = 0 
 try: TODOTXT_DATE_ON_ADD
 except: TODOTXT_DATE_ON_ADD = 0
 try: TODOTXT_DEFAULT_ACTION
@@ -240,8 +247,19 @@ def _archive(TODO,DONE):
      fDONE.write("%s\n" % item)
 
 def main():
+  global TODOTXT_VERBOSE,TODOTXT_PLAIN,TODOTXT_CFG_FILE,TODOTXT_FORCE,\
+    TODOTXT_PRESERVE_LINE_NUMBERS,TODOTXT_AUTO_ARCHIVE,TODOTXT_DATE_ON_ADD,\
+    TODOTXT_DEFAULT_ACTION,TODOTXT_SORT_COMMAND,TODOTXT_FINAL_FILTER
+
   parser = argparse.ArgumentParser(description='Process some todos.',
                                    formatter_class=argparse.RawTextHelpFormatter) 
+  
+  parser.add_argument('-a', dest='TODOTXT_AUTO_ARCHIVE', action='store_const',
+                   const=0, 
+                   help="Don't auto-archive tasks automatically on completion")
+  parser.add_argument('-d', dest='TODOTXT_CFG_FILE', action='store',
+                   help="Use a configuration file other than the default ~/.todo/config")
+
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del','rm','depri','dp','help','listall','lsa','listcon','lsc',
                    'listfile','lsf','listpri','lsp','listproj','lsprj', 
@@ -276,9 +294,28 @@ def main():
                       nargs=argparse.REMAINDER,
                       help="remaining args help")
   args=parser.parse_args()
-  #print "actions:",args.actions
-  #print "args_remaintintAarguments",args.remainingArguments
+  print "actions:",args.actions
+  print "args_remaintintAarguments",args.remainingArguments
 
+# Process configuration files
+# this requires one of the command line arguments to be processed
+  if args.TODOTXT_CFG_FILE is not None:
+    TODOTXT_CFG_FILE=args.TODOTXT_CFG_FILE 
+  print TODOTXT_CFG_FILE #TODO: debug delete
+  cfgparser = ConfigParser(allow_no_value=True)    
+  cfgparser.read(TODOTXT_CFG_FILE)                    
+  param = {k:v for k,v in cfgparser.items('TODO') }
+  print "P",param                            
+  if "TODOTXT_AUTO_ARCHIVE".lower() in param:
+    TODOTXT_AUTO_ARCHIVE=param["TODOTXT_AUTO_ARCHIVE".lower()]
+
+# Process (the rest of) command line arguments
+  if args.TODOTXT_AUTO_ARCHIVE is not None:
+   TODOTXT_AUTO_ARCHIVE=args.TODOTXT_AUTO_ARCHIVE
+
+#TODO probably need to do some sanity checking here
+
+# Collected arguments - ready to process actions
   for case in switch(args.actions):
     if case('list') or case ('ls'):
         _list(TODO_FILE,args.remainingArguments)
@@ -468,6 +505,9 @@ def main():
 
         with open(TODO_FILE, "wb") as file:
           file.writelines(lines)
+        if TODOTXT_AUTO_ARCHIVE:
+          _archive(TODO_FILE,DONE_FILE)
+
         break
     if case('del','rm'):
         linesDeleted=0
