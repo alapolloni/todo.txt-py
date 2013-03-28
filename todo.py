@@ -189,8 +189,11 @@ def _list(FILE,TERMS):
                   (re_late2.sub(highlightLate2, 
                        (re_late.sub(highlightLate, 
                                     re_pri.sub(highlightPriority, item)))))),  
-
-  print "TODO:", len(SRC), " of ", originalSRCLenth, " tasks shown"
+  if TODOTXT_VERBOSE is not 0:
+    print "--"
+    print "TODO:", len(SRC), " of ", originalSRCLenth, " tasks shown"
+  
+  #TODO need to add if VERBOSE is greater than 1 then print the filter command. 
 
 def _add(FILE,TERMS):
   if len(TERMS)==0 and TODOTXT_FORCE == 0:
@@ -207,6 +210,10 @@ def _addto(FILE,TERMS):
   with open(FILE, "ab") as fwrite:
     fwrite.write(input)
     fwrite.close()
+  if TODOTXT_VERBOSE is not 0:
+    taskNum = sum(1 for line in open(FILE))
+    print taskNum ," ",input,
+    print "TODO: ", taskNum, " added."
 
 def _append(FILE,itemNum,TERMS):
   #print "FILE:",FILE
@@ -248,6 +255,8 @@ def _archive(TODO,DONE):
     if line: #else, removes empty lines
       if re.match('x',line,re.IGNORECASE):
         completedLines.append(line)
+        if TODOTXT_VERBOSE is not 0:
+          print line
       else:
         todoLines.append(line)
   fTODO=open(TODO,'wb')
@@ -257,6 +266,8 @@ def _archive(TODO,DONE):
   if len(completedLines):#yes, there are completed lines so append to the done.txt"
     for item in completedLines:
      fDONE.write("%s\n" % item)
+  if TODOTXT_VERBOSE is not 0:
+    print "TODO: ",TODO," archived."
 
 def main():
   global TODOTXT_VERBOSE,TODOTXT_PLAIN,TODOTXT_CFG_FILE,TODOTXT_FORCE,\
@@ -274,6 +285,10 @@ def main():
   parser.add_argument('-f', dest='TODOTXT_FORCE', action='store_const',
                    const=1, 
                    help="Forces actions without confirmation or interactive input")
+  parser.add_argument('-v', dest='TODOTXT_VERBOSE', action='store_const',
+                   const=1, 
+                   help="Verbose mode turns on confirmation messages")
+
 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del','rm','depri','dp','help','listall','lsa','listcon','lsc',
@@ -313,7 +328,7 @@ def main():
   print "args_remaintintAarguments",args.remainingArguments
 
 # Process configuration files
-# this requires one of the command line arguments to be processed
+# this requires one of the command line arguments(getting the CFG FILE) to be processed
   if args.TODOTXT_CFG_FILE is not None:
     TODOTXT_CFG_FILE=args.TODOTXT_CFG_FILE 
   print TODOTXT_CFG_FILE #TODO: debug delete
@@ -325,6 +340,8 @@ def main():
     TODOTXT_AUTO_ARCHIVE=cfgparser.getint('TODO',"TODOTXT_AUTO_ARCHIVE".lower())
   if "TODOTXT_FORCE".lower() in param:
     TODOTXT_FORCE=cfgparser.getint('TODO',"TODOTXT_FORCE".lower())
+  if "TODOTXT_VERBOSE".lower() in param:
+    TODOTXT_VERBOSE=cfgparser.getint('TODO',"TODOTXT_VERBOSE".lower())
     
 
 
@@ -334,6 +351,8 @@ def main():
     TODOTXT_AUTO_ARCHIVE=args.TODOTXT_AUTO_ARCHIVE
   if args.TODOTXT_FORCE is not None:
     TODOTXT_FORCE=args.TODOTXT_FORCE 
+  if args.TODOTXT_VERBOSE is not None:
+    TODOTXT_VERBOSE=args.TODOTXT_VERBOSE 
 
   print "TODOTXT_FORCE",TODOTXT_FORCE  
 
@@ -540,8 +559,8 @@ def main():
           file.writelines(lines)
         if TODOTXT_AUTO_ARCHIVE:
           _archive(TODO_FILE,DONE_FILE)
-
         break
+
     if case('del','rm'):
         linesDeleted=0
         with open(TODO_FILE, "r") as source:
@@ -557,18 +576,24 @@ def main():
             var='Y'
           if var == 'Y': 
             linesDeleted += 1
+            deleteMe=lines[itemNum]
             lines[itemNum]="\n"
-            print "You entered ", var, " deleted."
+            if TODOTXT_VERBOSE > 1:  
+              print "You entered ", var, ", deleting."
+            if  TODOTXT_PRESERVE_LINE_NUMBERS == 0: #then get rid of empty lines before 
+            #writing need to do this afterwards because deleting within the for above 
+            #for multiple deletes will mess up the index
+              lines = [ line for line in lines if line != "\n"] 
+            with open(TODO_FILE, "wb") as file:
+              file.writelines(lines)
+            if TODOTXT_VERBOSE is not 0:  
+              print itemNum," ",deleteMe
+              print "TODO: ",itemNum,"deleted."
+              #print "TODO: ",linesDeleted,"task(s) deleted"
           else: 
             print "You entered ",var," OK, not deleting."
-        if  TODOTXT_PRESERVE_LINE_NUMBERS == 0: #then get rid of empty lines before 
-        #writing need to do this afterwards because deleting within the for above 
-        #for multiple deletes will mess up the index
-          lines = [ line for line in lines if line != "\n"] 
-        with open(TODO_FILE, "wb") as file:
-          file.writelines(lines)
-        print "TODO: ",linesDeleted,"task(s) deleted"
         break
+
     if case('append','app'): 
       if len(args.remainingArguments) > 0:
         item = int(args.remainingArguments.pop(0))
