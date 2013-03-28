@@ -12,6 +12,7 @@
 2. all the command line options - need a list
 	- TODOTXT_FORCE
 	- TODOTXT_AUTO_ARCHIVE 
+	- TODOTXT_VERBOSE in progress, stopped at 'del'
 1. configuration file
 1. add needs verbosity
 1. do needs verbosity
@@ -20,6 +21,7 @@
 1. make for the .exe
 2. add due:tomorrow, and the week days
 3. del ITEM# is out of range = nice error
+4. del ITEM# TERM, just delete the TERM from the item
 
 ## notes ##
 ### Configuration Value Precedence ###
