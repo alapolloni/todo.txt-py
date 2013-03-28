@@ -562,20 +562,28 @@ def main():
         break
 
     if case('del','rm'):
-        linesDeleted=0
-        with open(TODO_FILE, "r") as source:
-          lines = source.readlines()
-        for itemNum in args.remainingArguments:
+        errmsg='usage: todo del ITEM# TERM'
+        if len(args.remainingArguments) > 0 : 
+          itemNum = args.remainingArguments.pop(0)
           itemNum.replace(',','')  #if comma separated remove the comma,
           itemNum=int(itemNum)
           itemNum -= 1 #to match list index numbering
+        else:
+          sys.exit(errmsg)
+
+        with open(TODO_FILE, "r") as source:
+          lines = source.readlines()
+
+        if len(lines) >= itemNum:
+          deleteMe=lines[itemNum]
+ 
+        if len(args.remainingArguments) == 0 : #just delete the item
           if TODOTXT_FORCE is 0:
             question = "\nDelete '"+lines[itemNum]+"'? (Y/n)"
             var = raw_input(question)
           else:
             var='Y'
           if var == 'Y': 
-            linesDeleted += 1
             deleteMe=lines[itemNum]
             lines[itemNum]="\n"
             if TODOTXT_VERBOSE > 1:  
@@ -584,14 +592,24 @@ def main():
             #writing need to do this afterwards because deleting within the for above 
             #for multiple deletes will mess up the index
               lines = [ line for line in lines if line != "\n"] 
-            with open(TODO_FILE, "wb") as file:
-              file.writelines(lines)
             if TODOTXT_VERBOSE is not 0:  
-              print itemNum," ",deleteMe
-              print "TODO: ",itemNum,"deleted."
+              print itemNum+1," ",deleteMe
+              print "TODO: ",itemNum+1,"deleted."
               #print "TODO: ",linesDeleted,"task(s) deleted"
-          else: 
+          else:  
             print "You entered ",var," OK, not deleting."
+        else: #just delete the TERM from the line
+          TERM = args.remainingArguments.pop(0)
+          newTodo=re.sub(re.escape(TERM),'',lines[itemNum])
+          lines[itemNum]=newTodo
+          if TODOTXT_VERBOSE is not 0:
+            print itemNum+1," ",deleteMe
+            print "TODO: Removed ",TERM," from task."
+            print itemNum+1," ",newTodo
+           
+        with open(TODO_FILE, "wb") as file:
+          file.writelines(lines)
+
         break
 
     if case('append','app'): 
