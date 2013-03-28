@@ -14,8 +14,8 @@ from datetime import date
 from ConfigParser import ConfigParser    
 
 
-TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
-#TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
+#TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
+TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
 TODO_FILE=TODO_DIR+"/todo.txt"
 DONE_FILE=TODO_DIR+"/done.txt"
 REPORT_FILE=TODO_DIR+"/report.txt"
@@ -193,6 +193,11 @@ def _list(FILE,TERMS):
   print "TODO:", len(SRC), " of ", originalSRCLenth, " tasks shown"
 
 def _add(FILE,TERMS):
+  if len(TERMS)==0 and TODOTXT_FORCE == 0:
+    TERMS=list()
+    TERMS.append(raw_input('Add:'))
+  elif len(TERMS)==0:
+    sys.exit('usage: TODO add "TODO ITEM"') 
   _addto(FILE,TERMS)
 
 def _addto(FILE,TERMS):
@@ -211,6 +216,11 @@ def _append(FILE,itemNum,TERMS):
   input= " ".join(TERMS)
   #print "input:",input
 
+  if len(TERMS)==0 and TODOTXT_FORCE == 0:
+    input = raw_input('Append:')
+  elif len(TERMS)==0:
+    sys.exit('usage: TODO append ITEM# "TEXT TO APPEND"') 
+
   with open(FILE, "r") as source:
     lines = source.readlines()
   with open(FILE, "wb") as source:
@@ -227,6 +237,8 @@ def _append(FILE,itemNum,TERMS):
           line=line.rstrip('\n')+" "+input+'\n'
           #print "line ",line
           source.write(line)
+          if TODOTXT_VERBOSE is not 0:
+            print lineCount," ",line
  
 def _archive(TODO,DONE):
   completedLines=[]
@@ -259,6 +271,9 @@ def main():
                    help="Don't auto-archive tasks automatically on completion")
   parser.add_argument('-d', dest='TODOTXT_CFG_FILE', action='store',
                    help="Use a configuration file other than the default ~/.todo/config")
+  parser.add_argument('-f', dest='TODOTXT_FORCE', action='store_const',
+                   const=1, 
+                   help="Forces actions without confirmation or interactive input")
 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del','rm','depri','dp','help','listall','lsa','listcon','lsc',
@@ -307,11 +322,20 @@ def main():
   param = {k:v for k,v in cfgparser.items('TODO') }
   print "P",param                            
   if "TODOTXT_AUTO_ARCHIVE".lower() in param:
-    TODOTXT_AUTO_ARCHIVE=param["TODOTXT_AUTO_ARCHIVE".lower()]
+    TODOTXT_AUTO_ARCHIVE=cfgparser.getint('TODO',"TODOTXT_AUTO_ARCHIVE".lower())
+  if "TODOTXT_FORCE".lower() in param:
+    TODOTXT_FORCE=cfgparser.getint('TODO',"TODOTXT_FORCE".lower())
+    
+
 
 # Process (the rest of) command line arguments
+  print "args",args
   if args.TODOTXT_AUTO_ARCHIVE is not None:
-   TODOTXT_AUTO_ARCHIVE=args.TODOTXT_AUTO_ARCHIVE
+    TODOTXT_AUTO_ARCHIVE=args.TODOTXT_AUTO_ARCHIVE
+  if args.TODOTXT_FORCE is not None:
+    TODOTXT_FORCE=args.TODOTXT_FORCE 
+
+  print "TODOTXT_FORCE",TODOTXT_FORCE  
 
 #TODO probably need to do some sanity checking here
 
@@ -422,12 +446,18 @@ def main():
       break
     if case('prepend','prep','replace'):
       action = args.actions
+      querytext = "Replacement: " if action == 'replace' else "Prepend: "
       itemNum = args.remainingArguments.pop(0)  #pop the 1st item off the list as the file
       if re.match('\d+',itemNum):
         itemNum=int(itemNum)-1 #convert to list index
       else:
         sys.exit ("Error: need ITEM#")
-      TEXT = " ".join(args.remainingArguments)
+
+      if len(args.remainingArguments) == 0 and TODOTXT_FORCE == 0: 
+        TEXT = raw_input(querytext)
+      else:
+        TEXT = " ".join(args.remainingArguments)
+
       with open(TODO_FILE, "r") as source:
         lines = source.readlines()
       TODO=lines[itemNum]
@@ -453,9 +483,12 @@ def main():
 
       newTEXT="{0}{1}{2}\n".format(priority,prepdate,itemText)
       if TODOTXT_VERBOSE == 1:
-        print "{0} {1}".format(str(itemNum+1),TODO)
-        print "TODO: Replaced task with"
-        print "{0} {1}".format(str(itemNum+1),newTEXT)
+        if action == 'replace':
+          print "{0} {1}".format(str(itemNum+1),TODO)
+          print "TODO: Replaced task with"
+          print "{0} {1}".format(str(itemNum+1),newTEXT)
+        else:
+          print "{0} {1}".format(str(itemNum+1),newTEXT)
 
       lines[itemNum]=newTEXT
 
@@ -517,8 +550,11 @@ def main():
           itemNum.replace(',','')  #if comma separated remove the comma,
           itemNum=int(itemNum)
           itemNum -= 1 #to match list index numbering
-          question = "\nDelete '"+lines[itemNum]+"'? (Y/n)"
-          var = raw_input(question)
+          if TODOTXT_FORCE is 0:
+            question = "\nDelete '"+lines[itemNum]+"'? (Y/n)"
+            var = raw_input(question)
+          else:
+            var='Y'
           if var == 'Y': 
             linesDeleted += 1
             lines[itemNum]="\n"
@@ -534,9 +570,12 @@ def main():
         print "TODO: ",linesDeleted,"task(s) deleted"
         break
     if case('append','app'): 
-      item = int(args.remainingArguments.pop(0))
-      print item
-      _append(TODO_FILE,item,args.remainingArguments)
+      if len(args.remainingArguments) > 0:
+        item = int(args.remainingArguments.pop(0))
+        print item
+        _append(TODO_FILE,item,args.remainingArguments)
+      else:
+        sys.exit('usage: todo append ITEM# "TEXT TO APPEND"')
       break
     if case('pri','p'): # default, could also just omit condition or 'if True'
       errmsg= 'usage: todo.sh pri ITEM# PRIORITY\n'

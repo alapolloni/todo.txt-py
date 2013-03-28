@@ -10,18 +10,24 @@
 1. DONE: add one configuration file
 2. DONE: add one environment variables
 2. all the command line options - need a list
+	- TODOTXT_FORCE
+	- TODOTXT_AUTO_ARCHIVE (In progress)
 1. configuration file
 1. add needs verbosity
 1. do needs verbosity
 1. document due:XXXX-XX-XX and due:XXXX-XX-XX XX:XX
 1. add PV add-on  (project view)
 1. make for the .exe
+2. add due:tomorrow, and the week days
+3. del ITEM# is out of range = nice error
 
 ## notes ##
 ### Configuration Value Precedence ###
 1. Command line.
-1. Config file thats name is declared on the command line.
+1. Config file that's name is declared on the command line.
 1. Environment vars
 1. Local config file (if exists)
 1. Global config file (if exists)
 1. Defaults set internally to the program.
+
+
