@@ -11,7 +11,7 @@
 2. DONE: add one environment variables
 2. all the command line options - need a list
 	- TODOTXT_FORCE
-	- TODOTXT_AUTO_ARCHIVE (In progress)
+	- TODOTXT_AUTO_ARCHIVE 
 1. configuration file
 1. add needs verbosity
 1. do needs verbosity
