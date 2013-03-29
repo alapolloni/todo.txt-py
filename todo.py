@@ -321,13 +321,13 @@ def main():
                       'prepend|prep ITEM# "TEXT TO PREPEND"\n'
                       'pri|p ITEM#  PRIORITY\n'  
                       'replace ITEM# "TEXT TO REPLACE"\n'
+                      'report\n'
                       )
                       #TODO
                       #help
                       #report
-  parser.add_argument(dest='remainingArguments',metavar='task number or description', 
-                      nargs=argparse.REMAINDER,
-                      help="remaining args help")
+  parser.add_argument(dest='remainingArguments',metavar='See "help" for more details', 
+                      nargs=argparse.REMAINDER)
   args=parser.parse_args()
   print "actions:",args.actions
   print "args_remaintintAarguments",args.remainingArguments
