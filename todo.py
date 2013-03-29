@@ -21,7 +21,7 @@ DONE_FILE=TODO_DIR+"/done.txt"
 REPORT_FILE=TODO_DIR+"/report.txt"
 TMP_FILE= TODO_DIR+"/todo.tmp"
 
-TODOTXT_PRESERVE_LINE_NUMBERS = 1
+TODOTXT_PRESERVE_LINE_NUMBERS = 0
 TODOTXT_VERBOSE = 1
 TODOTXT_FORCE = 0 
 TODOTXT_AUTO_ARCHIVE = 0 
@@ -42,7 +42,7 @@ except:
 try: TODOTXT_FORCE
 except: TODOTXT_FORCE = 0
 try: TODOTXT_PRESERVE_LINE_NUMBERS
-except: TODOTXT_PRESERVE_LINE_NUMBERS = 1
+except: TODOTXT_PRESERVE_LINE_NUMBERS = 0
 try: TODOTXT_AUTO_ARCHIVE
 except: TODOTXT_AUTO_ARCHIVE = 0 
 try: TODOTXT_DATE_ON_ADD
@@ -291,8 +291,9 @@ def main():
   parser.add_argument('-p', dest='TODOTXT_PLAIN', action='store_const',
                    const=1, 
                    help="Plain mode turns off colors")
-
-
+  parser.add_argument('-n', dest='TODOTXT_PRESERVE_LINE_NUMBERS', action='store_const',
+                   const=1, 
+                   help="Don't preserve line numbers; automatically remove blank lines on task deletion") 
 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del','rm','depri','dp','help','listall','lsa','listcon','lsc',
@@ -348,8 +349,8 @@ def main():
     TODOTXT_VERBOSE=cfgparser.getint('TODO',"TODOTXT_VERBOSE".lower())
   if "TODOTXT_PLAIN".lower() in param:
     TODOTXT_PLAIN=cfgparser.getint('TODO',"TODOTXT_PLAIN".lower())
-    
-
+  if "TODOTXT_PRESERVE_LINE_NUMBERS".lower() in param:
+    TODOTXT_PRESERVE_LINE_NUMBERS=cfgparser.getint('TODO',"TODOTXT_PRESERVE_LINE_NUMBERS".lower())
 
 # Process (the rest of) command line arguments
   print "args",args
@@ -361,7 +362,8 @@ def main():
     TODOTXT_VERBOSE=args.TODOTXT_VERBOSE 
   if args.TODOTXT_PLAIN is not None:
     TODOTXT_PLAIN=args.TODOTXT_PLAIN 
-
+  if args.TODOTXT_PRESERVE_LINE_NUMBERS is not None:
+    TODOTXT_PRESERVE_LINE_NUMBERS=args.TODOTXT_PRESERVE_LINE_NUMBERS
 
   print "TODOTXT_FORCE",TODOTXT_FORCE  
 
