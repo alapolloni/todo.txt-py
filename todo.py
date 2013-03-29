@@ -74,6 +74,13 @@ LIGHT_CYAN   = "\033[1;36m"
 WHITE        = "\033[1;37m"
 DEFAULT      = "\033[0m"
 
+PRI_A = YELLOW
+PRI_B = LIGHT_GREEN
+PRI_C = LIGHT_PURPLE
+PRI_X = WHITE
+LATE  = LIGHT_RED
+COLOR_DONE = DARK_GREY
+
 # we want a case statement
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
@@ -108,11 +115,6 @@ def highlightPriority(matchobj):
   """color replacement function used when highlighting priorities"""
   """took this from https://github.com/abztrakt/ya-todo-py """
 
-  PRI_A = YELLOW
-  PRI_B = LIGHT_GREEN
-  PRI_C = LIGHT_PURPLE
-  PRI_X = WHITE
-
   if (matchobj.group(1) == "(A)"):
       return PRI_A + matchobj.group(0) + DEFAULT
   elif (matchobj.group(1) == "(B)"):
@@ -124,7 +126,6 @@ def highlightPriority(matchobj):
 
 def highlightLate(matchobj):
     """color replacement function used when highlighting overdue items"""
-    LATE  = LIGHT_RED
     due = date(int(matchobj.group(2)), int(matchobj.group(3)), int(matchobj.group(4)))
     if due <= date.today():
         return matchobj.group(1) + LATE + "due:" + matchobj.group(2) + "-" + matchobj.group(3) + "-" \
@@ -134,7 +135,6 @@ def highlightLate(matchobj):
 
 def highlightLate2(matchobj):
     """color replacement function used when highlighting overdue items with time"""
-    LATE  = LIGHT_RED
     due = datetime.datetime(int(matchobj.group(2)), int(matchobj.group(3)), int(matchobj.group(4)), \
     	int(matchobj.group(5)), int(matchobj.group(6)))
     if due <= datetime.datetime(*time.localtime()[0:5]):
@@ -145,7 +145,6 @@ def highlightLate2(matchobj):
         return DEFAULT + matchobj.group(0) + DEFAULT
 
 def highLightDone(matchobj):
-  COLOR_DONE = DARK_GREY
   return COLOR_DONE + matchobj.group(0) + DEFAULT
 
 def _list(FILE,TERMS):
@@ -273,6 +272,7 @@ def main():
   global TODOTXT_VERBOSE,TODOTXT_PLAIN,TODOTXT_CFG_FILE,TODOTXT_FORCE,\
     TODOTXT_PRESERVE_LINE_NUMBERS,TODOTXT_AUTO_ARCHIVE,TODOTXT_DATE_ON_ADD,\
     TODOTXT_DEFAULT_ACTION,TODOTXT_SORT_COMMAND,TODOTXT_FINAL_FILTER
+  global PRI_A,PRI_B,PRI_C,PRI_X,LATE,COLOR_DONE 
 
   parser = argparse.ArgumentParser(description='Process some todos.',
                                    formatter_class=argparse.RawTextHelpFormatter) 
@@ -288,6 +288,10 @@ def main():
   parser.add_argument('-v', dest='TODOTXT_VERBOSE', action='store_const',
                    const=1, 
                    help="Verbose mode turns on confirmation messages")
+  parser.add_argument('-p', dest='TODOTXT_PLAIN', action='store_const',
+                   const=1, 
+                   help="Plain mode turns off colors")
+
 
 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
@@ -342,6 +346,8 @@ def main():
     TODOTXT_FORCE=cfgparser.getint('TODO',"TODOTXT_FORCE".lower())
   if "TODOTXT_VERBOSE".lower() in param:
     TODOTXT_VERBOSE=cfgparser.getint('TODO',"TODOTXT_VERBOSE".lower())
+  if "TODOTXT_PLAIN".lower() in param:
+    TODOTXT_PLAIN=cfgparser.getint('TODO',"TODOTXT_PLAIN".lower())
     
 
 
@@ -353,10 +359,26 @@ def main():
     TODOTXT_FORCE=args.TODOTXT_FORCE 
   if args.TODOTXT_VERBOSE is not None:
     TODOTXT_VERBOSE=args.TODOTXT_VERBOSE 
+  if args.TODOTXT_PLAIN is not None:
+    TODOTXT_PLAIN=args.TODOTXT_PLAIN 
+
 
   print "TODOTXT_FORCE",TODOTXT_FORCE  
 
+  if TODOTXT_PLAIN is not 0:
+    PRI_A = ''
+    PRI_B = ''
+    PRI_C = ''
+    PRI_X = ''
+    LATE  = ''
+    COLOR_DONE = ''
+
+  print PRI_A,"PRI_A",DEFAULT
 #TODO probably need to do some sanity checking here
+
+
+
+
 
 # Collected arguments - ready to process actions
   for case in switch(args.actions):
@@ -700,8 +722,8 @@ def main():
       f.close
       if TODOTXT_VERBOSE is not 0:
         print "TODO: Report file updated."
-      with open(REPORT_FILE, 'r') as fin:
-        print fin.read()
+      with open(REPORT_FILE, 'r') as f:
+        print f.read()
       break
 
     if case('help'):
