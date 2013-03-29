@@ -10,18 +10,33 @@
 1. DONE: add one configuration file
 2. DONE: add one environment variables
 2. all the command line options - need a list
-	- TODOTXT_FORCE
-	- TODOTXT_AUTO_ARCHIVE 
-	- TODOTXT_VERBOSE - done
-1. configuration file
-1. add needs verbosity
-1. do needs verbosity
+	- -f TODOTXT_FORCE - done
+	- -a TODOTXT_AUTO_ARCHIVE 
+	- -v TODOTXT_VERBOSE - done
+	- -d TODOTXT_CFG_FILE -done 
+	- -p TODOTXT_PLAIN -done
+	- -n PRESERVE_LINE_NUMBERS -done
+	- -t TODOTXT_DATE_ON_ADD=1 -done 
+1. write a configuration file
+2. fix listpri 
 1. document due:XXXX-XX-XX and due:XXXX-XX-XX XX:XX
+2. added sanity checks
 1. add PV add-on  (project view)
 1. make for the .exe
 2. add due:tomorrow, and the week days
 3. del ITEM# is out of range = nice error
 4. del ITEM# TERM, just delete the TERM from the item
+5. look for the config file in a default TODO.sh-ish location.
+5. stuff I dont care about and will do later
+	- -P ( hide priority (x) labels.
+	- -@
+	- -+
+	- -vv
+	- -V
+	- -x
+	- TODOTXT_DEFAULT_ACTION=""       run this when called with no arguments  
+	- TODOTXT_SORT_COMMAND="sort ..." customize list output                   
+	- TODOTXT_FINAL_FILTER="sed ..."  customize list after color, P@+ hiding  
 
 ## notes ##
 ### Configuration Value Precedence ###

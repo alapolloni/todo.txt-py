@@ -204,8 +204,10 @@ def _add(FILE,TERMS):
 
 def _addto(FILE,TERMS):
   #TERMS needs to end up as one string
-  input= " ".join(TERMS)
-  input= datetime.date.today().strftime('%Y-%m-%d ')+input+"\n"
+  input= " ".join(TERMS)+"\n"
+  if TODOTXT_DATE_ON_ADD is not 0:
+    input=datetime.date.today().strftime('%Y-%m-%d ')+input
+
   with open(FILE, "ab") as fwrite:
     fwrite.write(input)
     fwrite.close()
@@ -294,6 +296,9 @@ def main():
   parser.add_argument('-n', dest='TODOTXT_PRESERVE_LINE_NUMBERS', action='store_const',
                    const=1, 
                    help="Don't preserve line numbers; automatically remove blank lines on task deletion") 
+  parser.add_argument('-t', dest='TODOTXT_DATE_ON_ADD', action='store_const',
+                   const=1, 
+                   help=" Prepend the current date to a task automatically when it's added") 
 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del','rm','depri','dp','help','listall','lsa','listcon','lsc',
@@ -351,6 +356,9 @@ def main():
     TODOTXT_PLAIN=cfgparser.getint('TODO',"TODOTXT_PLAIN".lower())
   if "TODOTXT_PRESERVE_LINE_NUMBERS".lower() in param:
     TODOTXT_PRESERVE_LINE_NUMBERS=cfgparser.getint('TODO',"TODOTXT_PRESERVE_LINE_NUMBERS".lower())
+  if "TODOTXT_DATE_ON_ADD".lower() in param:
+    TODOTXT_DATE_ON_ADD=cfgparser.getint('TODO',"TODOTXT_DATE_ON_ADD".lower())
+
 
 # Process (the rest of) command line arguments
   print "args",args
@@ -364,8 +372,11 @@ def main():
     TODOTXT_PLAIN=args.TODOTXT_PLAIN 
   if args.TODOTXT_PRESERVE_LINE_NUMBERS is not None:
     TODOTXT_PRESERVE_LINE_NUMBERS=args.TODOTXT_PRESERVE_LINE_NUMBERS
+  if args.TODOTXT_DATE_ON_ADD is not None:
+    TODOTXT_DATE_ON_ADD=args.TODOTXT_DATE_ON_ADD
 
   print "TODOTXT_FORCE",TODOTXT_FORCE  
+  print "TODOTXT_DATE_ON_ADD", TODOTXT_DATE_ON_ADD
 
   if TODOTXT_PLAIN is not 0:
     PRI_A = ''
