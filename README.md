@@ -9,7 +9,7 @@
 1. DONE: add one command line option (not action) 
 1. DONE: add one configuration file
 2. DONE: add one environment variables
-2. all the command line options - need a list
+2. DONE: all the command line options - need a list
 	- -f TODOTXT_FORCE - done
 	- -a TODOTXT_AUTO_ARCHIVE 
 	- -v TODOTXT_VERBOSE - done
@@ -17,8 +17,10 @@
 	- -p TODOTXT_PLAIN -done
 	- -n PRESERVE_LINE_NUMBERS -done
 	- -t TODOTXT_DATE_ON_ADD=1 -done 
-1. write a configuration file
-2. fix listpri 
+1. fix _list 
+	2. needs sort (ignore case)
+	3. sort ignore date
+	2. DONE-(sorta)- fix listpri (needs _list to be fixed)
 1. document due:XXXX-XX-XX and due:XXXX-XX-XX XX:XX
 2. added sanity checks
 1. add PV add-on  (project view)
@@ -26,7 +28,8 @@
 2. add due:tomorrow, and the week days
 3. del ITEM# is out of range = nice error
 4. del ITEM# TERM, just delete the TERM from the item
-5. look for the config file in a default TODO.sh-ish location.
+1. write a configuration file
+2. 5. look for the config file in a default TODO.sh-ish location.
 5. stuff I dont care about and will do later
 	- -P ( hide priority (x) labels.
 	- -@

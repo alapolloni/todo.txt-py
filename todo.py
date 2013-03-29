@@ -14,8 +14,8 @@ from datetime import date
 from ConfigParser import ConfigParser    
 
 
-#TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
-TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
+TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
+#TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
 TODO_FILE=TODO_DIR+"/todo.txt"
 DONE_FILE=TODO_DIR+"/done.txt"
 REPORT_FILE=TODO_DIR+"/report.txt"
@@ -436,9 +436,10 @@ def main():
           #2, do it yourself this one time
           #3, rething the escape...
           print "error: this doesn't do what you think it should"
-          for i in range(ord('a'),ord('z')+1): 
-            listPRI=[ '('+chr(i).upper()+')' ]
-            _list(TODO_FILE,listPRI)
+          _list(TODO_FILE,'(')
+          #for i in range(ord('a'),ord('z')+1): 
+            #listPRI=[ '('+chr(i).upper()+')' ]
+            #_list(TODO_FILE,listPRI)
           break
         break    
     if case('listproj','lsprj'):
@@ -721,7 +722,7 @@ def main():
       total=sum(1 for line in open(TODO_FILE))
       tdone=sum(1 for line in open(DONE_FILE))
       ntime=datetime.datetime.today().strftime('%Y-%m-%d-%X')
-      techo='{0} {1}    {2}\n'.format(ntime,total,tdone)
+      techo='{0} {1} {2}\n'.format(ntime,total,tdone)
       #open it differently if the file exists or not so not using with
       #need to makes sure it's closed properly
       if not os.path.exists(REPORT_FILE):
