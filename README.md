@@ -12,7 +12,7 @@
 2. all the command line options - need a list
 	- TODOTXT_FORCE
 	- TODOTXT_AUTO_ARCHIVE 
-	- TODOTXT_VERBOSE in progress, stopped at 'del'
+	- TODOTXT_VERBOSE - done
 1. configuration file
 1. add needs verbosity
 1. do needs verbosity

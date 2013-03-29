@@ -293,7 +293,7 @@ def main():
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del','rm','depri','dp','help','listall','lsa','listcon','lsc',
                    'listfile','lsf','listpri','lsp','listproj','lsprj', 
-                   'move','mv','prepend','prep','pri','replace','p','test']
+                   'move','mv','prepend','prep','pri','replace','p','report','test']
   parser.add_argument(dest='actions',metavar='action', 
                       choices=list_of_choices,
                       help= 
@@ -462,6 +462,11 @@ def main():
         _add(dest,line)
         with open(src, "wb") as file:
           file.writelines(lines)
+        if TODOTXT_VERBOSE is not 0:
+          print itemNum+1," ",line[0]
+          print "TODO: ", itemNum+1, " moved from ",src," to ",dest,"."
+      else:
+        print "TODO: No tasks moved."
       break
     if case('prepend','prep','replace'):
       action = args.actions
@@ -546,14 +551,16 @@ def main():
 
           #completed must be a lower case x
           if re.match('^x',lines[itemNum]):
-            print itemNum+1," ",lines[itemNum]," is already marked as done"
+            print itemNum+1," ",lines[itemNum]," is already marked as done."
           elif itemNum <0:
             print itemNum+1," is less then 1"
           else:
             lines[itemNum]="x "+ datetime.date.today().strftime('%Y-%m-%d ') \
                             + lines[itemNum]
             lines[itemNum]=re.sub(r'\(.\)','',lines[itemNum])
-            #TODO archive if set as default
+            if TODOTXT_VERBOSE is not 0:
+              print itemNum+1," ", lines[itemNum]
+              print "TODO: ", itemNum+1, " marked as done."
 
         with open(TODO_FILE, "wb") as file:
           file.writelines(lines)
@@ -562,55 +569,54 @@ def main():
         break
 
     if case('del','rm'):
-        errmsg='usage: todo del ITEM# TERM'
-        if len(args.remainingArguments) > 0 : 
-          itemNum = args.remainingArguments.pop(0)
-          itemNum.replace(',','')  #if comma separated remove the comma,
-          itemNum=int(itemNum)
-          itemNum -= 1 #to match list index numbering
-        else:
-          sys.exit(errmsg)
+      errmsg='usage: todo del ITEM# TERM'
+      if len(args.remainingArguments) > 0 : 
+        itemNum = args.remainingArguments.pop(0)
+        itemNum.replace(',','')  #if comma separated remove the comma,
+        itemNum=int(itemNum)
+        itemNum -= 1 #to match list index numbering
+      else:
+        sys.exit(errmsg)
 
-        with open(TODO_FILE, "r") as source:
-          lines = source.readlines()
+      with open(TODO_FILE, "r") as source:
+        lines = source.readlines()
 
-        if len(lines) >= itemNum:
-          deleteMe=lines[itemNum]
+      if len(lines) >= itemNum:
+        deleteMe=lines[itemNum]
  
-        if len(args.remainingArguments) == 0 : #just delete the item
-          if TODOTXT_FORCE is 0:
-            question = "\nDelete '"+lines[itemNum]+"'? (Y/n)"
-            var = raw_input(question)
-          else:
-            var='Y'
-          if var == 'Y': 
-            deleteMe=lines[itemNum]
-            lines[itemNum]="\n"
-            if TODOTXT_VERBOSE > 1:  
-              print "You entered ", var, ", deleting."
-            if  TODOTXT_PRESERVE_LINE_NUMBERS == 0: #then get rid of empty lines before 
-            #writing need to do this afterwards because deleting within the for above 
-            #for multiple deletes will mess up the index
-              lines = [ line for line in lines if line != "\n"] 
-            if TODOTXT_VERBOSE is not 0:  
-              print itemNum+1," ",deleteMe
-              print "TODO: ",itemNum+1,"deleted."
-              #print "TODO: ",linesDeleted,"task(s) deleted"
-          else:  
-            print "You entered ",var," OK, not deleting."
-        else: #just delete the TERM from the line
-          TERM = args.remainingArguments.pop(0)
-          newTodo=re.sub(re.escape(TERM),'',lines[itemNum])
-          lines[itemNum]=newTodo
-          if TODOTXT_VERBOSE is not 0:
+      if len(args.remainingArguments) == 0 : #just delete the item
+        if TODOTXT_FORCE is 0:
+          question = "\nDelete '"+lines[itemNum]+"'? (Y/n)"
+          var = raw_input(question)
+        else:
+          var='Y'
+        if var == 'Y': 
+          deleteMe=lines[itemNum]
+          lines[itemNum]="\n"
+          if TODOTXT_VERBOSE > 1:  
+            print "You entered ", var, ", deleting."
+          if  TODOTXT_PRESERVE_LINE_NUMBERS == 0: #then get rid of empty lines before 
+          #writing need to do this afterwards because deleting within the for above 
+          #for multiple deletes will mess up the index
+            lines = [ line for line in lines if line != "\n"] 
+          if TODOTXT_VERBOSE is not 0:  
             print itemNum+1," ",deleteMe
-            print "TODO: Removed ",TERM," from task."
-            print itemNum+1," ",newTodo
-           
-        with open(TODO_FILE, "wb") as file:
-          file.writelines(lines)
-
-        break
+            print "TODO: ",itemNum+1,"deleted."
+            #print "TODO: ",linesDeleted,"task(s) deleted"
+        else:  
+          print "You entered ",var," OK, not deleting."
+      else: #just delete the TERM from the line
+        TERM = args.remainingArguments.pop(0)
+        newTodo=re.sub(re.escape(TERM),'',lines[itemNum])
+        lines[itemNum]=newTodo
+        if TODOTXT_VERBOSE is not 0:
+          print itemNum+1," ",deleteMe
+          print "TODO: Removed ",TERM," from task."
+          print itemNum+1," ",newTodo
+         
+      with open(TODO_FILE, "wb") as file:
+        file.writelines(lines)
+      break
 
     if case('append','app'): 
       if len(args.remainingArguments) > 0:
@@ -620,32 +626,39 @@ def main():
       else:
         sys.exit('usage: todo append ITEM# "TEXT TO APPEND"')
       break
+
     if case('pri','p'): # default, could also just omit condition or 'if True'
       errmsg= 'usage: todo.sh pri ITEM# PRIORITY\n'
-      ITEMNUM=args.remainingArguments.pop(0)  #pop the 1st item off the list as the file
-      if re.match('\d+',ITEMNUM):  #is it an really a number ?
-        ITEMNUM=int(ITEMNUM)  #pop the 1st item off the list as the file
-        ITEMNUM -=1 #decrement to match list index, starts with zero
+      itemNum=args.remainingArguments.pop(0)  #pop the 1st item off the list as the file
+      if re.match('\d+',itemNum):  #is it an really a number ?
+        itemNum=int(itemNum)  #pop the 1st item off the list as the file
+        itemNum -=1 #decrement to match list index, starts with zero
       else:
         sys.exit(errmsg+"note: ITEM# must be a number")
-      PRIORITY=args.remainingArguments.pop(0)  #pop the 1st item off the list as the file
+      if len(args.remainingArguments) > 0:
+        PRIORITY=args.remainingArguments.pop(0)  #pop the 1st item off the list as the file
+      else:
+        sys.exit(errmsg)
       if not re.match('[A-Z]',PRIORITY):
         sys.exit(errmsg+"note: PRIORITY must be anywhere from A to Z.")
-        break
 
       with open(TODO_FILE, "r") as source:
         lines = source.readlines()
     
-      if (ITEMNUM < 0) or (ITEMNUM+1 > len(lines)):
+      if (itemNum < 0) or (itemNum+1 > len(lines)):
         sys.exit(errmsg+"ITEM# needs to be equal to a line#")
 
       #get rid of the current Priority
-      lines[ITEMNUM]=re.sub('^\(.\)','',lines[ITEMNUM])
+      lines[itemNum]=re.sub('^\(.\)','',lines[itemNum])
       #add the new priority 
-      lines[ITEMNUM]="(" + PRIORITY + ") " + lines[ITEMNUM] 
+      lines[itemNum]="(" + PRIORITY + ") " + lines[itemNum] 
       with open(TODO_FILE, "wb") as file:
         file.writelines(lines)
+      if TODOTXT_VERBOSE is not 0:
+        print itemNum+1," ",lines[itemNum]
+        print "TODO: ",itemNum+1," prioritized ("+ PRIORITY+")"
       break
+
     if case('depri','dp'):
       with open(TODO_FILE, "r") as source:
         lines = source.readlines()
@@ -654,17 +667,43 @@ def main():
       print ITEMNUMS
       for ITEMNUM in ITEMNUMS:
         ITEMNUM -= 1 # to match the list index
-        print ITEMNUM+1, lines[ITEMNUM]
         lines[ITEMNUM]=re.sub('^\(.\) ','',lines[ITEMNUM])
-        print "TODO: ", ITEMNUM+1," deprioritized"
+        if TODOTXT_VERBOSE is not 0:
+          print ITEMNUM+1, lines[ITEMNUM]
+          print "TODO: ", ITEMNUM+1," deprioritized."
       with open(TODO_FILE, "wb") as file:
         file.writelines(lines)
       break
+
     if case('test'):
       lines=readFileToLines(TODO_FILE)  
       print "lines:",
       print lines
       break
+
+    if case('report'):
+      _archive(TODO_FILE,DONE_FILE)
+      total=sum(1 for line in open(TODO_FILE))
+      tdone=sum(1 for line in open(DONE_FILE))
+      ntime=datetime.datetime.today().strftime('%Y-%m-%d-%X')
+      techo='{0} {1}    {2}\n'.format(ntime,total,tdone)
+      #open it differently if the file exists or not so not using with
+      #need to makes sure it's closed properly
+      if not os.path.exists(REPORT_FILE):
+        #create file and write header
+        f=open(REPORT_FILE, 'wb') 
+        f.write("datetime            todos dones\n")
+      else:
+        #append stuff
+        f=open(REPORT_FILE, 'ab')
+      f.write(techo)
+      f.close
+      if TODOTXT_VERBOSE is not 0:
+        print "TODO: Report file updated."
+      with open(REPORT_FILE, 'r') as fin:
+        print fin.read()
+      break
+
     if case('help'):
       #TODO oneline_usage 
       print """
