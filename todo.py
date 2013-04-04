@@ -14,8 +14,8 @@ from datetime import date
 from ConfigParser import ConfigParser    
 
 
-TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
-#TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
+#TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
+TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
 TODO_FILE=TODO_DIR+"/todo.txt"
 DONE_FILE=TODO_DIR+"/done.txt"
 REPORT_FILE=TODO_DIR+"/report.txt"
@@ -53,6 +53,9 @@ try: TODOTXT_SORT_COMMAND
 except: TODOTXT_SORT_COMMAND=None #TODO
 try: TODOTXT_FINAL_FILTER
 except: TODOTXT_FINAL_FILTER=None #TODO
+try: TODOTXT_SORT_ALPHA
+except:TODOTXT_SORT_ALPHA=0
+
 
 # ANSI Colors
 NONE         = ""
@@ -159,11 +162,12 @@ def _list(FILE,TERMS):
   ## We need one level of padding for each power of 10 $LINES uses
   LINES=len(SRC)
   PADDING=len(str(LINES))
+  print "PADDING:",PADDING
   ## and add line numbers to the SRC
   for x in range(len(SRC)):
     #SRC[x]=str(x+1)+" "*PADDING+SRC[x]
     SRC[x]=str(x+1).zfill(PADDING)+" "+SRC[x]
-
+    #SRC[x]="%3d: %s" % (x+1, v)
   originalSRCLenth=len(SRC) 
 
   #each time through the FOR loop cuts down SRC
@@ -175,7 +179,16 @@ def _list(FILE,TERMS):
     else:
       print "return all with TERM:"+TERM
       SRC = filter (lambda a: re.search(re.escape(TERM),a), SRC)
- 
+
+  if TODOTXT_SORT_ALPHA is not 0:
+    #above, you added the line number. you dont want to sort by line number
+    #PADDING+1 is the 1st character of the item (without the line number)
+    #and then lower you ignore case.  (this might be wrong for non-ASCII non-english todos
+    SRC.sort(key=lambda x: x[PADDING+1:].lower())
+    #SRC.sort(key=str.lower)    
+    #SRC.sort(key=lambda x: x[PADDING+1:])
+
+
   #add colors 
   re_pri = re.compile(r".*(\([A-Z]\)).*") 
   re_late = re.compile(r"(.*)due:(....)-(..)-(..)(.*)")
@@ -273,7 +286,9 @@ def _archive(TODO,DONE):
 def main():
   global TODOTXT_VERBOSE,TODOTXT_PLAIN,TODOTXT_CFG_FILE,TODOTXT_FORCE,\
     TODOTXT_PRESERVE_LINE_NUMBERS,TODOTXT_AUTO_ARCHIVE,TODOTXT_DATE_ON_ADD,\
-    TODOTXT_DEFAULT_ACTION,TODOTXT_SORT_COMMAND,TODOTXT_FINAL_FILTER
+    TODOTXT_DEFAULT_ACTION,TODOTXT_SORT_COMMAND,TODOTXT_FINAL_FILTER, \
+    TODOTXT_SORT_ALPHA
+
   global PRI_A,PRI_B,PRI_C,PRI_X,LATE,COLOR_DONE 
 
   parser = argparse.ArgumentParser(description='Process some todos.',
@@ -298,7 +313,10 @@ def main():
                    help="Don't preserve line numbers; automatically remove blank lines on task deletion") 
   parser.add_argument('-t', dest='TODOTXT_DATE_ON_ADD', action='store_const',
                    const=1, 
-                   help=" Prepend the current date to a task automatically when it's added") 
+                   help="Prepend the current date to a task automatically when it's added") 
+  parser.add_argument('-A', dest='TODOTXT_SORT_ALPHA', action='store_const',
+                   const=1, 
+                   help="Sort Alphabetically.  Default is false and list as saved in the file") 
 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del','rm','depri','dp','help','listall','lsa','listcon','lsc',
@@ -358,7 +376,8 @@ def main():
     TODOTXT_PRESERVE_LINE_NUMBERS=cfgparser.getint('TODO',"TODOTXT_PRESERVE_LINE_NUMBERS".lower())
   if "TODOTXT_DATE_ON_ADD".lower() in param:
     TODOTXT_DATE_ON_ADD=cfgparser.getint('TODO',"TODOTXT_DATE_ON_ADD".lower())
-
+  if "TODOTXT_SORT_ALPHA".lower() in param:
+    TODOTXT_SORT_ALPHA=cfgparser.getint('TODO',"TODOTXT_SORT_ALPHA".lower())
 
 # Process (the rest of) command line arguments
   print "args",args
@@ -374,9 +393,12 @@ def main():
     TODOTXT_PRESERVE_LINE_NUMBERS=args.TODOTXT_PRESERVE_LINE_NUMBERS
   if args.TODOTXT_DATE_ON_ADD is not None:
     TODOTXT_DATE_ON_ADD=args.TODOTXT_DATE_ON_ADD
+  if args.TODOTXT_SORT_ALPHA is not None:
+    TODOTXT_SORT_ALPHA=args.TODOTXT_SORT_ALPHA
 
   print "TODOTXT_FORCE",TODOTXT_FORCE  
   print "TODOTXT_DATE_ON_ADD", TODOTXT_DATE_ON_ADD
+  print "TODOTXT_SORT_ALPHA", TODOTXT_SORT_ALPHA
 
   if TODOTXT_PLAIN is not 0:
     PRI_A = ''
@@ -386,12 +408,7 @@ def main():
     LATE  = ''
     COLOR_DONE = ''
 
-  print PRI_A,"PRI_A",DEFAULT
 #TODO probably need to do some sanity checking here
-
-
-
-
 
 # Collected arguments - ready to process actions
   for case in switch(args.actions):
@@ -877,11 +894,18 @@ def main():
 		        Verbose mode turns on confirmation messages
 		    -vv
 		        Extra verbose mode prints some debugging information
+            (not implemented)
 		    -V
 		        Displays version, license and credits
+            (not implemented)
 		    -x
 		        Disables TODOTXT_FINAL_FILTER
 
+      Extras:
+        Due dates:  You can add a due date and it will be colored red if due today or before.
+                    Format is:
+                      due:YYYY-MM-DD or due:YYYY-MM-DD HH:mm
+                    Ex: due:2013-01-31 or due:2013-01-31 01:00
 
 		  Environment variables:
 		    TODOTXT_AUTO_ARCHIVE=0          is same as option -a
