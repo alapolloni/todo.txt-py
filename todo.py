@@ -25,7 +25,7 @@ TODOTXT_PRESERVE_LINE_NUMBERS = 0
 TODOTXT_VERBOSE = 1
 TODOTXT_FORCE = 0 
 TODOTXT_AUTO_ARCHIVE = 0 
-TODOTXT_CFG_FILE=r"C:\Users\aapollon\Documents\GitHub\todo.txt-py\.config"
+TODOTXT_CFG_FILE=os.environ['HOME']+r"\Documents\GitHub\todo.txt-py\.config"
 
 print "TMP_FILE",TMP_FILE
 
@@ -215,8 +215,44 @@ def _add(FILE,TERMS):
     sys.exit('usage: TODO add "TODO ITEM"') 
   _addto(FILE,TERMS)
 
+daysOfWeekDict = dict(zip('monday tuesday wednesday thursday friday saturday sunday \
+                mon tue wed thur fri sat sun'.split(),
+                range(7)+range(7)))
+
+def getDateFromDayOf(dateTimeObj, reqDayOf):
+    weekday = dateTimeObj.weekday()        
+    return dateTimeObj + datetime.timedelta(days=(daysOfWeekDict[reqDayOf.lower()]-weekday-1)%7+1)
+
 def _addto(FILE,TERMS):
   #TERMS needs to end up as one string
+  matchDays=daysOfWeekDict.keys()
+  matchDays.append('today')
+  matchDays.append('tomorrow')
+
+  #print TERMS
+  for x in range(0,len(TERMS)):
+    #print "x",x," ",TERMS[x]
+    TERMstring=TERMS[x]
+    for day in matchDays:
+      #print "day",day
+      m=re.match(re.compile('due:(%s)'%day),TERMstring)
+      if m is not None:
+        #print "match!",m.group(1)
+        reqDay=m.group(1)
+        #if today
+        dateTimeObj=datetime.datetime.now()
+        if re.match('today',reqDay,re.IGNORECASE):
+          #fall through
+          i=1
+        elif re.match('tomorrow',reqDay,re.IGNORECASE):
+          dateTimeObj=dateTimeObj+datetime.timedelta(days=1)
+          #print "if tomorrow"
+        else:
+          #print "else if a weekday"
+          dateTimeObj=getDateFromDayOf(dateTimeObj,reqDay)
+        #print "end up with:",dateTimeObj.date()
+        TERMS[x]="due:"+dateTimeObj.strftime("%Y-%m-%d") 
+  #print TERMS
   input= " ".join(TERMS)+"\n"
   if TODOTXT_DATE_ON_ADD is not 0:
     input=datetime.date.today().strftime('%Y-%m-%d ')+input

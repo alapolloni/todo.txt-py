@@ -1,3 +1,28 @@
+#Random scripts
+#
+*.txt
+a.py
+build
+color.py
+config.ini
+config.py
+config2.ini
+day.py
+dist
+done.txt
+logdict2.7.3.final.0-1.log
+move.txt
+report.txt
+scope.py
+scope2.py
+scope3.py
+scope4.py
+todo.par
+todo.par1
+todo.spec
+todo.txt
+todo.txt_orig
+
 #################
 ## Eclipse
 #################
@@ -161,3 +186,5 @@ pip-log.txt
 
 # Mac crap
 .DS_Store
+
+
