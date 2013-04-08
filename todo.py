@@ -13,22 +13,6 @@ import datetime
 from datetime import date
 from ConfigParser import ConfigParser    
 
-
-#TODO_DIR=os.environ['HOME']+r'\Documents\My Dropbox\Taskpaper'
-TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
-TODO_FILE=TODO_DIR+"/todo.txt"
-DONE_FILE=TODO_DIR+"/done.txt"
-REPORT_FILE=TODO_DIR+"/report.txt"
-TMP_FILE= TODO_DIR+"/todo.tmp"
-
-TODOTXT_PRESERVE_LINE_NUMBERS = 0
-TODOTXT_VERBOSE = 1
-TODOTXT_FORCE = 0 
-TODOTXT_AUTO_ARCHIVE = 0 
-TODOTXT_CFG_FILE=os.environ['HOME']+r"\Documents\GitHub\todo.txt-py\.config"
-
-print "TMP_FILE",TMP_FILE
-
 # defaults if not yet defined, 
 # why would they be defined? hmm...?
 # from TODO.sh
@@ -153,7 +137,7 @@ def highLightDone(matchobj):
 def _list(FILE,TERMS):
   if os.path.isfile(FILE): src=FILE
   elif os.path.isfile(FILE): src=FILE
-  else: sys.exit("TODO: File"+FILE+"does not exit")
+  else: sys.exit("TODO: File "+FILE+' does not exist.  Check TODO_DIR location OR use "todo add My1stTodo".' )
     
   f=open(FILE,'r')
   SRC=f.readlines()
@@ -369,6 +353,8 @@ def main():
   parser.add_argument('-A', dest='TODOTXT_SORT_ALPHA', action='store_const',
                    const=1, 
                    help="Sort Alphabetically.  Default is false and list as saved in the file") 
+  parser.add_argument('--writeConfig', dest='TODOTXT_WRITECONFIG', action='store_true',
+                   help="Write the config file from all active configurateion options. This requires at least one positional argument.  Try --writeConfig ls") 
 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del','rm','depri','dp','help','listall','lsa','listcon','lsc',
@@ -376,6 +362,7 @@ def main():
                    'move','mv','prepend','prep','pri','replace','p','report','test']
   parser.add_argument(dest='actions',metavar='action', 
                       choices=list_of_choices,
+                      default=argparse.SUPPRESS,
                       help= 
                       'add|a "THING I NEED TO DO +projeect @context"\n'
                       'addto DESTFILE "TEXT TO ADD"\n'
@@ -402,34 +389,72 @@ def main():
                       #help
                       #report
   parser.add_argument(dest='remainingArguments',metavar='See "help" for more details', 
-                      nargs=argparse.REMAINDER)
+                      nargs=argparse.REMAINDER, default=argparse.SUPPRESS)
   args=parser.parse_args()
   print "actions:",args.actions
   print "args_remaintintAarguments",args.remainingArguments
 
+  # Proccess the Environment Variables
+
+  TODOTXT_DIR=os.environ.get('TODO_DIR') # TODO.sh looks for TODO_DIR
+  if os.environ.has_key('TODOTXT_DIR'):
+    TODOTXT_DIR=os.environ.get('TODOTXT_DIR') # use TODOTXT_DIR everywhere else
+  TODOTXT_AUTO_ARCHIVE=os.environ.get('TODOTXT_AUTO_ARCHIVE') # is same as option -a
+  TODOTXT_CFG_FILE=os.environ.get('TODOTXT_CFG_FILE')         
+                                              # is same as option -d CONFIG_FILE
+  TODOTXT_FORCE=os.environ.get('TODOTXT_FORCE')               # is same as option -f
+  TODOTXT_PRESERVE_LINE_NUMBERS=os.environ.get('TODOTXT_PRESERVE_LINE_NUMBERS')    
+                                                          # is same as option -n
+  TODOTXT_PLAIN=os.environ.get('TODOTXT_PLAIN')               # is same as option -p
+  TODOTXT_DATE_ON_ADD=os.environ.get('TODOTXT_DATE_ON_ADD')   # is same as option -t
+  TODOTXT_VERBOSE=os.environ.get('TODOTXT_VERBOSE')           # is same as option -v
+
+  if TODOTXT_DIR is None:
+    print "check: TODOTXT_DIR is None"
+    TODOTXT_DIR = os.path.expanduser("~/.todo")
+  else:
+    print "check: TODOTXT_DIR is:",TODOTXT_DIR
+  #TODOTXT_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
+  #TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
+  print "check: TODOTXT_DIR is:",TODOTXT_DIR
+  TODO_FILE=TODOTXT_DIR+"/todo.txt"
+  DONE_FILE=TODOTXT_DIR+"/done.txt"
+  REPORT_FILE=TODOTXT_DIR+"/report.txt"
+
+  try:
+      print "TODOTXT_CFG_FILE:",TODOTXT_CFG_FILE
+  except:
+      print "not set TODOTXT_CFG_FILE:"
 # Process configuration files
-# this requires one of the command line arguments(getting the CFG FILE) to be processed
+# this requires one of the command line arguments(getting the CFG FILE) 
+# to be processed
   if args.TODOTXT_CFG_FILE is not None:
     TODOTXT_CFG_FILE=args.TODOTXT_CFG_FILE 
-  print TODOTXT_CFG_FILE #TODO: debug delete
+  else:
+    TODOTXT_CFG_FILE=TODOTXT_DIR+"/todo.cfg"
   cfgparser = ConfigParser(allow_no_value=True)    
-  cfgparser.read(TODOTXT_CFG_FILE)                    
-  param = {k:v for k,v in cfgparser.items('TODO') }
-  print "P",param                            
-  if "TODOTXT_AUTO_ARCHIVE".lower() in param:
-    TODOTXT_AUTO_ARCHIVE=cfgparser.getint('TODO',"TODOTXT_AUTO_ARCHIVE".lower())
-  if "TODOTXT_FORCE".lower() in param:
-    TODOTXT_FORCE=cfgparser.getint('TODO',"TODOTXT_FORCE".lower())
-  if "TODOTXT_VERBOSE".lower() in param:
-    TODOTXT_VERBOSE=cfgparser.getint('TODO',"TODOTXT_VERBOSE".lower())
-  if "TODOTXT_PLAIN".lower() in param:
-    TODOTXT_PLAIN=cfgparser.getint('TODO',"TODOTXT_PLAIN".lower())
-  if "TODOTXT_PRESERVE_LINE_NUMBERS".lower() in param:
-    TODOTXT_PRESERVE_LINE_NUMBERS=cfgparser.getint('TODO',"TODOTXT_PRESERVE_LINE_NUMBERS".lower())
-  if "TODOTXT_DATE_ON_ADD".lower() in param:
-    TODOTXT_DATE_ON_ADD=cfgparser.getint('TODO',"TODOTXT_DATE_ON_ADD".lower())
-  if "TODOTXT_SORT_ALPHA".lower() in param:
-    TODOTXT_SORT_ALPHA=cfgparser.getint('TODO',"TODOTXT_SORT_ALPHA".lower())
+  print "TODOTXT_CFG_FILE:",TODOTXT_CFG_FILE
+  try: 
+    cfgparser.read(TODOTXT_CFG_FILE)                    
+    param = {k:v for k,v in cfgparser.items('TODO') }
+    print "P",param                            
+    if "TODOTXT_AUTO_ARCHIVE".lower() in param:
+      TODOTXT_AUTO_ARCHIVE=cfgparser.getint('TODO',"TODOTXT_AUTO_ARCHIVE".lower())
+    if "TODOTXT_FORCE".lower() in param:
+      TODOTXT_FORCE=cfgparser.getint('TODO',"TODOTXT_FORCE".lower())
+    if "TODOTXT_VERBOSE".lower() in param:
+      TODOTXT_VERBOSE=cfgparser.getint('TODO',"TODOTXT_VERBOSE".lower())
+    if "TODOTXT_PLAIN".lower() in param:
+      TODOTXT_PLAIN=cfgparser.getint('TODO',"TODOTXT_PLAIN".lower())
+    if "TODOTXT_PRESERVE_LINE_NUMBERS".lower() in param:
+      TODOTXT_PRESERVE_LINE_NUMBERS=cfgparser.getint('TODO',"TODOTXT_PRESERVE_LINE_NUMBERS".lower())
+    if "TODOTXT_DATE_ON_ADD".lower() in param:
+      TODOTXT_DATE_ON_ADD=cfgparser.getint('TODO',"TODOTXT_DATE_ON_ADD".lower())
+    if "TODOTXT_SORT_ALPHA".lower() in param:
+      TODOTXT_SORT_ALPHA=cfgparser.getint('TODO',"TODOTXT_SORT_ALPHA".lower())
+  except:
+    print "no cfg file to read" #TODO comment this out
+    pass 
 
 # Process (the rest of) command line arguments
   print "args",args
@@ -448,11 +473,26 @@ def main():
   if args.TODOTXT_SORT_ALPHA is not None:
     TODOTXT_SORT_ALPHA=args.TODOTXT_SORT_ALPHA
 
+
+# Done setting config items:  Start using them
+  if args.TODOTXT_WRITECONFIG is True:
+      print "TODOTXT_WRITECONFIG is True"
+      fConfigWrite=open('TODOTXT_CONFIG','w')
+      cfgparser.write(fConfigWrite)      
+
+  print "TODOTXT_DIR ",TODOTXT_DIR
   print "TODOTXT_FORCE",TODOTXT_FORCE  
   print "TODOTXT_DATE_ON_ADD", TODOTXT_DATE_ON_ADD
   print "TODOTXT_SORT_ALPHA", TODOTXT_SORT_ALPHA
+  print "TODOTXT_PLAIN", TODOTXT_PLAIN
+  print "TODOTXT_AUTO_ARCHIVE",TODOTXT_AUTO_ARCHIVE
+  print "TODOTXT_FORCE",TODOTXT_FORCE 
+  print "TODOTXT_VERBOSE",TODOTXT_VERBOSE 
+  print "TODOTXT_PRESERVE_LINE_NUMBERS",TODOTXT_PRESERVE_LINE_NUMBERS
+  print "TODOTXT_DATE_ON_ADD",TODOTXT_DATE_ON_ADD
+  print "TODOTXT_SORT_ALPHA",TODOTXT_SORT_ALPHA
 
-  if TODOTXT_PLAIN is not 0:
+  if TODOTXT_PLAIN is not 0 and TODOTXT_PLAIN is not None:
     PRI_A = ''
     PRI_B = ''
     PRI_C = ''
@@ -529,10 +569,10 @@ def main():
         itemNum = args.remainingArguments.pop(0)
       else: print errmsg;break
       if len(args.remainingArguments) > 0 : 
-        dest=TODO_DIR +"/"+  args.remainingArguments.pop(0)
+        dest=TODOTXT_DIR +"/"+  args.remainingArguments.pop(0)
       else: print errmsg;break
       if len(args.remainingArguments) > 0 : 
-        src =TODO_DIR +"/"+  args.remainingArguments.pop(0)
+        src =TODOTXT_DIR +"/"+  args.remainingArguments.pop(0)
       else: src=TODO_FILE
 
       if not os.path.isfile(dest): sys.exit("TODO: Destination file "+dest+" does not exist") 

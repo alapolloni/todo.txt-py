@@ -6,27 +6,29 @@
 - I wanted to learn python.
 
 ## TODO ##
-1. <del>fix _list 
-	2. DONE Added -A for sort Alphabetically
-	3. DONE ignores date and case 
-	2. DONE-(sorta)- fix listpri (needs _list to be fixed)</del>
-1. <del>document due:XXXX-XX-XX and due:XXXX-XX-XX XX:XX</del>
-1. <del>make for the .exe</del>
-2. <del>add due:tomorrow, and the week days</del>
-4. <del>put due:day in a def so that it can be called from anywhere, specifically append.</del>
-2. added sanity checks
-5. <del>del ITEM# is out of range = nice error</del>
-4. <del>del ITEM# TERM, just delete the TERM from the item : this was already done</del>
-5. <del>append check ITEM# is an integer and within range.</del>
-1. write a configuration file from current options
-2. go through todo.sh config file and add missing.
-2. look for the config file in a default TODO.sh-ish location.
-3. add instructions for doskey for aliases in windows
-4. add e for edit todo.txt in editor
-4. test for nt vs nix for home and default location
-3. add PV add-on (project view) 
-4. add birdseye and stuff 
-5. stuff I might do later
+- <del>fix _list 
+	- 	DONE Added -A for sort Alphabetically
+	- 	DONE ignores date and case 
+	- 	DONE-(sorta)fix listpri (needs _list to be fixed)</del>
+-  <del>document due:XXXX-XX-XX and due:XXXX-XX-XX XX:XX</del>
+-  <del>make for the .exe</del>
+-  <del>add due:tomorrow, and the week days</del>
+-  <del>put due:day in a def so that it can be called from anywhere, specifically append.</del>
+
+-  <del>del ITEM# is out of range = nice error</del>
+-  <del>del ITEM# TERM, just delete the TERM from the item : this was already done</del>
+-  <del>append: check ITEM# is an integer and within range.</del>
+-  <del>test for tododir,etc and set home and default location/files</del>
+-  <del>look for the config file in a default TODO.sh-ish location.</del>
+-  added sanity checks
+-  write a configuration file from current options
+	-. this is a bigger pain that I assumed
+-  go through todo.sh config file and add missing.
+-  add e for edit todo.txt in editor
+-  add instructions for doskey for aliases in windows
+-  add PV add-on (project view) 
+-  add birdseye and stuff 
+-  stuff I might do later
 	- -P ( hide priority (x) labels.
 	- -@
 	- -+
