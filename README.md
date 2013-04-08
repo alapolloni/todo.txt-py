@@ -6,8 +6,14 @@
 - Mostly a copy of todo.sh.
 
 ## Windows Installation ##
-- SAVE AS [todo.exe](todo.exe) to your home directory ( C:\Users\\{your login id\}\ )
-- Follow these [instructions](/Notes/WindowsAliases.md)
+1. SAVE AS [todo.exe](todo.exe) to your home directory ( C:\Users\\{your login id\}\ )
+2. Follow these [instructions](/Notes/WindowsAliases.md)
+3. Open a new cmd.exe
+4. Type: the letter *t*.  This will run the todo command.
+5. Then: try *t help*
+6. Then: *t add "read todo.txt help text"*
+7. And then: *t ls*
+4. Look at autorun.bat.  It should be self explanatory how to add more aliases and environment variables
 
 ## TODO/ISSUES ##
 -  review the --help
