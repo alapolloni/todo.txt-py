@@ -6,7 +6,7 @@
 - Mostly a copy of todo.sh.
 
 ## Windows Installation ##
-- Copy [todo.exe](todo.exe) your home directory (C:\Users\\{your login id\}\
+- SAVE AS [todo.exe](todo.exe) to your home directory ( C:\Users\\{your login id\}\ )
 - Follow these [instructions](/Notes/WindowsAliases.md)
 
 ## TODO/ISSUES ##
