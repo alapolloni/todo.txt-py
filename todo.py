@@ -215,44 +215,50 @@ def _add(FILE,TERMS):
     sys.exit('usage: TODO add "TODO ITEM"') 
   _addto(FILE,TERMS)
 
-daysOfWeekDict = dict(zip('monday tuesday wednesday thursday friday saturday sunday \
-                mon tue wed thur fri sat sun'.split(),
+daysOfWeekDict = dict(zip('monday tuesday wednesday thursday friday saturday \
+                          sunday mon tue wed thur fri sat sun'.split(),
                 range(7)+range(7)))
 
-def getDateFromDayOf(dateTimeObj, reqDayOf):
-    weekday = dateTimeObj.weekday()        
-    return dateTimeObj + datetime.timedelta(days=(daysOfWeekDict[reqDayOf.lower()]-weekday-1)%7+1)
+def getDateFromDayOf(dateTimeObj, reqDayOf):  
+  #return the dateTimeObj of the next occurance of reqDayOf( monday )
+  weekday = dateTimeObj.weekday()        
+  return dateTimeObj + datetime.timedelta(days=(daysOfWeekDict[reqDayOf.lower()]-weekday-1)%7+1)
 
-def _addto(FILE,TERMS):
-  #TERMS needs to end up as one string
+def expandDateInDue(TERMstr):
+  #due:today -> due:2013-04-08
   matchDays=daysOfWeekDict.keys()
   matchDays.append('today')
   matchDays.append('tomorrow')
 
-  #print TERMS
+  for day in matchDays:
+    m=re.match(re.compile('due:(%s)'%day),TERMstr)
+    if m is not None:
+      #print "match!",m.group(1)
+      reqDay=m.group(1)
+      #if today
+      dateTimeObj=datetime.datetime.now()
+      if re.match('today',reqDay,re.IGNORECASE):
+        #fall through, dateTimeObj already set correctly
+        pass
+      elif re.match('tomorrow',reqDay,re.IGNORECASE):
+        dateTimeObj=dateTimeObj+datetime.timedelta(days=1)
+        #print "if tomorrow"
+      else:
+        #print "else if a weekday"
+        dateTimeObj=getDateFromDayOf(dateTimeObj,reqDay)
+        #print "returned:", dateTimeObj.date()
+      #print "end up with:",dateTimeObj.date()
+      TERMstr="due:"+dateTimeObj.strftime("%Y-%m-%d")
+  #print "return:",TERMstr
+  return TERMstr
+
+def _addto(FILE,TERMS):
+  #TERMS needs to end up as one string
   for x in range(0,len(TERMS)):
-    #print "x",x," ",TERMS[x]
-    TERMstring=TERMS[x]
-    for day in matchDays:
-      #print "day",day
-      m=re.match(re.compile('due:(%s)'%day),TERMstring)
-      if m is not None:
-        #print "match!",m.group(1)
-        reqDay=m.group(1)
-        #if today
-        dateTimeObj=datetime.datetime.now()
-        if re.match('today',reqDay,re.IGNORECASE):
-          #fall through
-          i=1
-        elif re.match('tomorrow',reqDay,re.IGNORECASE):
-          dateTimeObj=dateTimeObj+datetime.timedelta(days=1)
-          #print "if tomorrow"
-        else:
-          #print "else if a weekday"
-          dateTimeObj=getDateFromDayOf(dateTimeObj,reqDay)
-        #print "end up with:",dateTimeObj.date()
-        TERMS[x]="due:"+dateTimeObj.strftime("%Y-%m-%d") 
-  #print TERMS
+    print "x",x," ",TERMS[x]
+    TERMS[x]=expandDateInDue(TERMS[x]) 
+    print "x: after",x," ",TERMS[x]
+  
   input= " ".join(TERMS)+"\n"
   if TODOTXT_DATE_ON_ADD is not 0:
     input=datetime.date.today().strftime('%Y-%m-%d ')+input
@@ -278,6 +284,11 @@ def _append(FILE,itemNum,TERMS):
   elif len(TERMS)==0:
     sys.exit('usage: TODO append ITEM# "TEXT TO APPEND"') 
 
+  inputList=input.split()
+  for x in range(0,len(inputList)):
+    inputList[x]=expandDateInDue(inputList[x]) 
+  input= " ".join(inputList)
+  
   with open(FILE, "r") as source:
     lines = source.readlines()
   with open(FILE, "wb") as source:
