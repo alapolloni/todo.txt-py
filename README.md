@@ -7,7 +7,7 @@
 
 ## Windows Installation ##
 - Copy todo.exe your home directory (C:\Users\\{your login id\}\
-- Follow these [instructions](\Notes\WindowsAliases.md)
+- Follow these [instructions](/Notes/WindowsAliases.md)
 
 ## TODO/ISSUES ##
 -  review the --help
