@@ -146,7 +146,8 @@ def _list(FILE,TERMS):
   ## We need one level of padding for each power of 10 $LINES uses
   LINES=len(SRC)
   PADDING=len(str(LINES))
-  print "PADDING:",PADDING
+  if TODOTXT_VERBOSE >=2:
+    print "PADDING:",PADDING
   ## and add line numbers to the SRC
   for x in range(len(SRC)):
     #SRC[x]=str(x+1)+" "*PADDING+SRC[x]
@@ -239,9 +240,7 @@ def expandDateInDue(TERMstr):
 def _addto(FILE,TERMS):
   #TERMS needs to end up as one string
   for x in range(0,len(TERMS)):
-    print "x",x," ",TERMS[x]
     TERMS[x]=expandDateInDue(TERMS[x]) 
-    print "x: after",x," ",TERMS[x]
   
   input= " ".join(TERMS)+"\n"
   if TODOTXT_DATE_ON_ADD is not 0:
@@ -341,6 +340,9 @@ def main():
   parser.add_argument('-v', dest='TODOTXT_VERBOSE', action='store_const',
                    const=1, 
                    help="Verbose mode turns on confirmation messages")
+  parser.add_argument('-vv', dest='TODOTXT_VERBOSE', action='store_const',
+                   const=2, 
+                   help="Extra verbose mode print some debugging information.")
   parser.add_argument('-p', dest='TODOTXT_PLAIN', action='store_const',
                    const=1, 
                    help="Plain mode turns off colors")
@@ -391,8 +393,9 @@ def main():
   parser.add_argument(dest='remainingArguments',metavar='See "help" for more details', 
                       nargs=argparse.REMAINDER, default=argparse.SUPPRESS)
   args=parser.parse_args()
-  print "actions:",args.actions
-  print "args_remaintintAarguments",args.remainingArguments
+  if TODOTXT_VERBOSE >=2:
+    print "actions:",args.actions
+    print "args_remaintintAarguments",args.remainingArguments
 
   # Proccess the Environment Variables
 
@@ -410,21 +413,19 @@ def main():
   TODOTXT_VERBOSE=os.environ.get('TODOTXT_VERBOSE')           # is same as option -v
 
   if TODOTXT_DIR is None:
-    print "check: TODOTXT_DIR is None"
     TODOTXT_DIR = os.path.expanduser("~/.todo")
-  else:
-    print "check: TODOTXT_DIR is:",TODOTXT_DIR
-  #TODOTXT_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
-  #TODO_DIR=os.environ['HOME']+r'\Documents\GitHub\todo.txt-py'
-  print "check: TODOTXT_DIR is:",TODOTXT_DIR
+  elif TODOTXT_VERBOSE >= 2:
+    print "After negative check against None: TODOTXT_DIR is:",TODOTXT_DIR 
   TODO_FILE=TODOTXT_DIR+"/todo.txt"
   DONE_FILE=TODOTXT_DIR+"/done.txt"
   REPORT_FILE=TODOTXT_DIR+"/report.txt"
 
-  try:
-      print "TODOTXT_CFG_FILE:",TODOTXT_CFG_FILE
-  except:
-      print "not set TODOTXT_CFG_FILE:"
+  if TODOTXT_VERBOSE >=2:
+    try:
+        print "TODOTXT_CFG_FILE:",TODOTXT_CFG_FILE
+    except:
+        print "not set TODOTXT_CFG_FILE:"
+
 # Process configuration files
 # this requires one of the command line arguments(getting the CFG FILE) 
 # to be processed
@@ -433,11 +434,9 @@ def main():
   else:
     TODOTXT_CFG_FILE=TODOTXT_DIR+"/todo.cfg"
   cfgparser = ConfigParser(allow_no_value=True)    
-  print "TODOTXT_CFG_FILE:",TODOTXT_CFG_FILE
   try: 
     cfgparser.read(TODOTXT_CFG_FILE)                    
     param = {k:v for k,v in cfgparser.items('TODO') }
-    print "P",param                            
     if "TODOTXT_AUTO_ARCHIVE".lower() in param:
       TODOTXT_AUTO_ARCHIVE=cfgparser.getint('TODO',"TODOTXT_AUTO_ARCHIVE".lower())
     if "TODOTXT_FORCE".lower() in param:
@@ -457,7 +456,6 @@ def main():
     pass 
 
 # Process (the rest of) command line arguments
-  print "args",args
   if args.TODOTXT_AUTO_ARCHIVE is not None:
     TODOTXT_AUTO_ARCHIVE=args.TODOTXT_AUTO_ARCHIVE
   if args.TODOTXT_FORCE is not None:
@@ -480,18 +478,22 @@ def main():
       fConfigWrite=open('TODOTXT_CONFIG','w')
       cfgparser.write(fConfigWrite)      
 
-  print "TODOTXT_DIR ",TODOTXT_DIR
-  print "TODOTXT_FORCE",TODOTXT_FORCE  
-  print "TODOTXT_DATE_ON_ADD", TODOTXT_DATE_ON_ADD
-  print "TODOTXT_SORT_ALPHA", TODOTXT_SORT_ALPHA
-  print "TODOTXT_PLAIN", TODOTXT_PLAIN
-  print "TODOTXT_AUTO_ARCHIVE",TODOTXT_AUTO_ARCHIVE
-  print "TODOTXT_FORCE",TODOTXT_FORCE 
-  print "TODOTXT_VERBOSE",TODOTXT_VERBOSE 
-  print "TODOTXT_PRESERVE_LINE_NUMBERS",TODOTXT_PRESERVE_LINE_NUMBERS
-  print "TODOTXT_DATE_ON_ADD",TODOTXT_DATE_ON_ADD
-  print "TODOTXT_SORT_ALPHA",TODOTXT_SORT_ALPHA
-
+  if TODOTXT_VERBOSE > 1:
+    print "command line args",args
+    print "Config File Parameters",param                            
+    print "TODOTXT_CFG_FILE:",TODOTXT_CFG_FILE
+    print "TODOTXT_DIR ",TODOTXT_DIR
+    print "TODOTXT_FORCE",TODOTXT_FORCE  
+    print "TODOTXT_DATE_ON_ADD", TODOTXT_DATE_ON_ADD
+    print "TODOTXT_SORT_ALPHA", TODOTXT_SORT_ALPHA
+    print "TODOTXT_PLAIN", TODOTXT_PLAIN
+    print "TODOTXT_AUTO_ARCHIVE",TODOTXT_AUTO_ARCHIVE
+    print "TODOTXT_FORCE",TODOTXT_FORCE 
+    print "TODOTXT_VERBOSE",TODOTXT_VERBOSE 
+    print "TODOTXT_PRESERVE_LINE_NUMBERS",TODOTXT_PRESERVE_LINE_NUMBERS
+    print "TODOTXT_DATE_ON_ADD",TODOTXT_DATE_ON_ADD
+    print "TODOTXT_SORT_ALPHA",TODOTXT_SORT_ALPHA
+  
   if TODOTXT_PLAIN is not 0 and TODOTXT_PLAIN is not None:
     PRI_A = ''
     PRI_B = ''
@@ -669,10 +671,10 @@ def main():
         _add(TODO_FILE,args.remainingArguments)
         break
     if case('addto'):
-        print "addto"
         destfile=args.remainingArguments.pop(0)  #pop the 1st item off the list as the file
-        print "destfile:",destfile
-        print "args_remaintintAarguments",args.remainingArguments
+        if TODOTXT_VERBOSE >=2:
+          print "addto destfile:",destfile
+          print "args_remaintintAarguments",args.remainingArguments
 
         if os.path.isfile(destfile):
           _addto(destfile,args.remainingArguments)
