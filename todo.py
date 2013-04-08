@@ -291,6 +291,11 @@ def _append(FILE,itemNum,TERMS):
   
   with open(FILE, "r") as source:
     lines = source.readlines()
+
+  if itemNum > len(lines):
+    errmsg="error: todo list has {} items".format(len(lines))
+    sys.exit(errmsg)
+
   with open(FILE, "wb") as source:
     lineCount=0
     for line in lines:
@@ -683,6 +688,10 @@ def main():
 
       if len(lines) >= itemNum:
         deleteMe=lines[itemNum]
+      else:
+        errmsg2="error: todo list only has {0} items".format(len(lines))
+        sys.exit(errmsg2)
+
  
       if len(args.remainingArguments) == 0 : #just delete the item
         if TODOTXT_FORCE is 0:
@@ -719,12 +728,18 @@ def main():
       break
 
     if case('append','app'): 
+      errmsg='usage: todo append ITEM# "TEXT TO APPEND"'
       if len(args.remainingArguments) > 0:
-        item = int(args.remainingArguments.pop(0))
+        try: 
+          item = int(args.remainingArguments.pop(0))
+        except ValueError: 
+          sys.exit(errmsg)
+        if item == 0:
+          sys.exit("error: the 1st ITEM# is 1")
         print item
         _append(TODO_FILE,item,args.remainingArguments)
       else:
-        sys.exit('usage: todo append ITEM# "TEXT TO APPEND"')
+        sys.exit(errmsg)
       break
 
     if case('pri','p'): # default, could also just omit condition or 'if True'

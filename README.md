@@ -15,17 +15,18 @@
 2. <del>add due:tomorrow, and the week days</del>
 4. <del>put due:day in a def so that it can be called from anywhere, specifically append.</del>
 2. added sanity checks
-5. del ITEM# is out of range = nice error
-4. del ITEM# TERM, just delete the TERM from the item
-5. append check ITEM# is an integer and within range.
+5. <del>del ITEM# is out of range = nice error</del>
+4. <del>del ITEM# TERM, just delete the TERM from the item : this was already done</del>
+5. <del>append check ITEM# is an integer and within range.</del>
 1. write a configuration file from current options
 2. go through todo.sh config file and add missing.
 2. look for the config file in a default TODO.sh-ish location.
 3. add instructions for doskey for aliases in windows
+4. add e for edit todo.txt in editor
 4. test for nt vs nix for home and default location
-3. add PV add-on  (project view) 
+3. add PV add-on (project view) 
 4. add birdseye and stuff 
-5. stuff I dont care about and will do later
+5. stuff I might do later
 	- -P ( hide priority (x) labels.
 	- -@
 	- -+
