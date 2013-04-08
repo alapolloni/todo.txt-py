@@ -161,10 +161,12 @@ def _list(FILE,TERMS):
   for TERM in TERMS:
     if re.match('-',TERM): 
       TERM=TERM[1:]
-      print "return all without TERM:"+TERM
+      if TODOTXT_VERBOSE == 1:
+        print "return all without TERM:"+TERM
       SRC = filter (lambda a: not re.search(re.escape(TERM),a), SRC)
     else:
-      print "return all with TERM:"+TERM
+      if TODOTXT_VERBOSE == 1:
+        print "return all with TERM:"+TERM
       SRC = filter (lambda a: re.search(re.escape(TERM),a), SRC)
 
   if TODOTXT_SORT_ALPHA is not 0:
@@ -454,7 +456,8 @@ def main():
     if "TODOTXT_SORT_ALPHA".lower() in param:
       TODOTXT_SORT_ALPHA=cfgparser.getint('TODO',"TODOTXT_SORT_ALPHA".lower())
   except:
-    print "no cfg file to read" #TODO comment this out
+    if TODOTXT_VERBOSE >= 2:
+      print "no cfg file to read" #TODO comment this out
     pass 
 
 # Process (the rest of) command line arguments
