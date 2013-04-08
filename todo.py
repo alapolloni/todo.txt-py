@@ -98,6 +98,8 @@ def readFileToLines(FILE):
     lines=f.readlines()
   return lines
 
+
+
 def highlightPriority(matchobj):
   """color replacement function used when highlighting priorities"""
   """took this from https://github.com/abztrakt/ya-todo-py """

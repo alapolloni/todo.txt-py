@@ -32,7 +32,7 @@
 	- -P ( hide priority (x) labels.
 	- -@
 	- -+
-	- -vv
+	- <del>-vv (extra verbose)</del>
 	- -V
 	- -x
 	- TODOTXT_DEFAULT_ACTION=""       run this when called with no arguments  
