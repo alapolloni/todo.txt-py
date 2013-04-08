@@ -12,16 +12,17 @@
 	2. DONE-(sorta)- fix listpri (needs _list to be fixed)</del>
 1. <del>document due:XXXX-XX-XX and due:XXXX-XX-XX XX:XX</del>
 1. <del>make for the .exe</del>
-2. added sanity checks
 2. <del>add due:tomorrow, and the week days</del>
-3. del ITEM# is out of range = nice error
+4. <del>put due:day in a def so that it can be called from anywhere, specifically append.</del>
+2. added sanity checks
+5. del ITEM# is out of range = nice error
 4. del ITEM# TERM, just delete the TERM from the item
 5. append check ITEM# is an integer and within range.
 1. write a configuration file from current options
 2. go through todo.sh config file and add missing.
 2. look for the config file in a default TODO.sh-ish location.
 3. add instructions for doskey for aliases in windows
-4. put due:day in a def so that it can be called from anywhere, specifically append.
+4. test for nt vs nix for home and default location
 3. add PV add-on  (project view) 
 4. add birdseye and stuff 
 5. stuff I dont care about and will do later
