@@ -1,6 +1,6 @@
 ## How to get Unix like alias in Windows##
-1. Run this [file](autorun_registryupdate.reg).  It will update your registry to automatically source autorun.bat from your home directory (IE: %HOME% , C:\Users\\{you}\\).
-2. Save [autorun.bat](autorun.bat) to %HOME%.
+1. SAVE AS this [file](autorun_registryupdate.reg) and run it..  It will update your registry to automatically source autorun.bat from your home directory (IE: %HOME% , C:\Users\\{you}\\).
+2. SAVE AS [autorun.bat](autorun.bat) to %HOME%.
 3. Open a new cmd.exe
 4. Type the letter *t*.  This will run the todo command.
 5. Then try *t --help*
