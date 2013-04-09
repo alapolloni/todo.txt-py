@@ -1,9 +1,5 @@
 #!/usr/bin/python -tt
 
-#format rules
-#https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format 
-
-
 """
 TODO.TXT Manager - Python Version (no GNU util requirements)
 Author          : Alex Apolloni <apolloni@yahoo.com> 
@@ -13,7 +9,6 @@ More info       : http://todotxt.com
 Todo File Format: https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format 
 Project Page    : https://github.com/alapolloni/todo.txt-py
 """
-
 
 #standard libs
 import argparse
@@ -25,10 +20,8 @@ import datetime
 from datetime import date
 from ConfigParser import ConfigParser    
 
-
 # defaults if not yet defined, 
 # why would they be defined? hmm...?
-# from TODO.sh
 try: TODOTXT_VERBOSE
 except: TODOTXT_VERBOSE = 1
 try: TODOTXT_PLAIN
@@ -145,9 +138,6 @@ def setTheme(theme):
         LATE = NONE
         COLOR_DONE = NONE 
 
-
-
-
 # we want a case statement
 # This class provides the functionality we want. You only need to look at
 # this if you want to know how this works. It only needs to be defined
@@ -171,12 +161,6 @@ class switch(object):
             return True
         else:
             return False
-
-#TODO replace all of the readlines to call this function
-def readFileToLines(FILE):
-  with open(FILE,'r') as f:
-    lines=f.readlines()
-  return lines
 
 def set_wincolor(color):
     """ set_wincolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY)"""
@@ -241,7 +225,7 @@ def _list(FILE,TERMS):
   SRC=f.readlines()
 
   ## Figure out how much padding we need to use
-  ## We need one level of padding for each power of 10 $LINES uses
+  ## We need one level of padding for each power of 10 LINES used 
   LINES=len(SRC)
   PADDING=len(str(LINES))
   if TODOTXT_VERBOSE >=2:
@@ -273,8 +257,7 @@ def _list(FILE,TERMS):
     #SRC.sort(key=str.lower)    
     #SRC.sort(key=lambda x: x[PADDING+1:])
 
-
-  #add colors 
+  #add colors , compile regex that we will search for.  
   re_pri = re.compile(r".*(\([A-Z]\)).*") 
   re_late = re.compile(r"(.*)due:(....)-(..)-(..)(.*)")
   re_late2 = re.compile(r"(.*)due: (....)-(..)-(..) (..):(..)(.*)")
@@ -311,8 +294,6 @@ def _list(FILE,TERMS):
   if TODOTXT_VERBOSE is not 0:
     print "--"
     print "TODO:", len(SRC), " of ", originalSRCLenth, " tasks shown"
-  
-  #TODO need to add if VERBOSE is greater than 1 then print the filter command. 
 
 def _add(FILE,TERMS):
   if len(TERMS)==0 and TODOTXT_FORCE == 0:
@@ -377,12 +358,7 @@ def _addto(FILE,TERMS):
     print "TODO: ", taskNum, " added."
 
 def _append(FILE,itemNum,TERMS):
-  #print "FILE:",FILE
-  #print "itemNum:",itemNum
-  #print "TERMS:",TERMS
- 
   input= " ".join(TERMS)
-  #print "input:",input
 
   if len(TERMS)==0 and TODOTXT_FORCE == 0:
     input = raw_input('Append:')
@@ -405,15 +381,10 @@ def _append(FILE,itemNum,TERMS):
     lineCount=0
     for line in lines:
         lineCount += 1
-        #print lineCount," ",line,
         if lineCount != itemNum: 
-          #print "not it, write the line"
           source.write(line)
         else:
-          #source.write(re.sub(r'^# deb', 'deb', line))
-          #print "append to the line"
           line=line.rstrip('\n')+" "+input+'\n'
-          #print "line ",line
           source.write(line)
           if TODOTXT_VERBOSE is not 0:
             print lineCount," ",line
@@ -611,12 +582,6 @@ def main():
   if args.TODOTXT_COLOR_THEME is not None:
     TODOTXT_COLOR_THEME=args.TODOTXT_COLOR_THEME
 
-# Done setting config items:  Start using them
-#  if args.TODOTXT_WRITECONFIG is True:
-#      print "TODOTXT_WRITECONFIG is True"
-#      fConfigWrite=open('TODOTXT_CONFIG','w')
-#      cfgparser.write(fConfigWrite)      
-
   if TODOTXT_VERBOSE > 1:
     print "command line args",args
     print "TODOTXT_CFG_FILE:",TODOTXT_CFG_FILE
@@ -635,14 +600,6 @@ def main():
     print "TODOTXT_DATE_ON_ADD",TODOTXT_DATE_ON_ADD
     print "TODOTXT_SORT_ALPHA",TODOTXT_SORT_ALPHA
   
-  #if TODOTXT_PLAIN is not 0 and TODOTXT_PLAIN is not None:
-    #PRI_A = ''
-    #PRI_B = ''
-    #PRI_C = ''
-    #PRI_X = ''
-    #LATE  = ''
-    #COLOR_DONE = ''
-
 # Set the color theme
 # Windows CMD themes require ctypes module only core > python 2.5
   #theme=TODOTXT_COLOR_THEME
@@ -655,7 +612,6 @@ def main():
       except ImportError:
           theme = 'nocolor'
   setTheme(theme)
-
 
 #TODO probably need to do some sanity checking here
 
@@ -701,12 +657,10 @@ def main():
           #1, just cycle through the priorities...
           #2, do it yourself this one time
           #3, rething the escape...
+          #4, search for (
           if TODOTXT_VERBOSE >= 2 :
             print "error: this doesn't do what you think it should.  It shows items with a ("
           _list(TODO_FILE,'(')
-          #for i in range(ord('a'),ord('z')+1): 
-            #listPRI=[ '('+chr(i).upper()+')' ]
-            #_list(TODO_FILE,listPRI)
           break
         break    
     if case('listproj','lsprj'):
@@ -890,7 +844,6 @@ def main():
       else:
         errmsg2="error: todo list only has {0} items".format(len(lines))
         sys.exit(errmsg2)
-
  
       if len(args.remainingArguments) == 0 : #just delete the item
         if TODOTXT_FORCE is 0:
