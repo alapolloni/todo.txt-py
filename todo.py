@@ -287,6 +287,8 @@ def _list(FILE,TERMS):
         print item,
       elif re_pri.match(item): 
         print re_pri.sub(highlightWindows, item),
+      else:
+        print item,
       set_wincolor(DEFAULT)
       if TODOTXT_VERBOSE >= 2 :
         print "print NT text item"
