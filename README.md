@@ -15,15 +15,13 @@
 7. And then: *t ls*
 4. Look at autorun.bat.  It should be self explanatory how to add more aliases and environment variables
 
+If you are using an ANSI compatible Terminal as a replacement for Window's cmd.exe you should use the --ansi switch or set TODOTXT_ANSI=1 via an environtment variable or a Config file.
+
 ## TODO/ISSUES ##
--  review the --help
--  add version info -V, -version
--  added sanity checks like in todo.sh
--  write a configuration file from current options
-	-. this is a bigger pain that I assumed
--  go through todo.sh config file and add missing.
+-  review the --help output
+-  add version info from -V, -version
+-  add sanity checks like in todo.sh
 -  add e for edit todo.txt in editor
--  add instructions for doskey for aliases in windows
 -  add action add-on ability.  Like PV(project view) add-on. 
 -  add birdseye and stuff 
 -  multiple line add doesn't seem to work in windows.
@@ -34,10 +32,7 @@
 	- -+
 	- -V
 	- -x
-	- TODOTXT_DEFAULT_ACTION=""       run this when called with no arguments  
-	- TODOTXT_SORT_COMMAND="sort ..." customize list output                   
-	- TODOTXT_FINAL_FILTER="sed ..."  customize list after color, P@+ hiding  
-
+	
 ## DONE ##
 - : add one command line option (not action)
 - : add one configuration file
@@ -64,9 +59,11 @@
 -  append: check ITEM# is an integer and within range.
 -  test for tododir,etc and set home and default location/files
 -  look for the config file in a default TODO.sh-ish location.
+-  add instructions for doskey for aliases in windows
 -  Add Windows color for both ANSI Terminals and default cmd.exe.
 	-    TODOTXT_COLOR_THEME & --ansi_theme {light,dark}
 	-    TODOTXT_ANSI & --ansi
+
 
 ## notes ##
 ### Configuration Value Precedence ###

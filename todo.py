@@ -1157,6 +1157,7 @@ def main():
                     Ex: due:2013-01-31 or due:2013-01-31 01:00
 
       Environment variables:
+        TODOTXT_DIR=DIRECTORY           
         TODOTXT_AUTO_ARCHIVE=0          is same as option -a
         TODOTXT_CFG_FILE=CONFIG_FILE    is same as option -d CONFIG_FILE
         TODOTXT_FORCE=1                 is same as option -f
