@@ -13,6 +13,7 @@ import datetime
 from datetime import date
 from ConfigParser import ConfigParser    
 
+
 # defaults if not yet defined, 
 # why would they be defined? hmm...?
 # from TODO.sh
@@ -40,6 +41,7 @@ except: TODOTXT_FINAL_FILTER=None #TODO
 try: TODOTXT_SORT_ALPHA
 except:TODOTXT_SORT_ALPHA=0
 
+defaultTheme = 'dark'
 
 # ANSI Colors
 NONE         = ""
@@ -61,12 +63,79 @@ LIGHT_CYAN   = "\033[1;36m"
 WHITE        = "\033[1;37m"
 DEFAULT      = "\033[0m"
 
-PRI_A = YELLOW
-PRI_B = LIGHT_GREEN
-PRI_C = LIGHT_PURPLE
-PRI_X = WHITE
-LATE  = LIGHT_RED
-COLOR_DONE = DARK_GREY
+# Windows Colors
+WIN_BLACK    = 0x00
+WIN_BLUE     = 0x01
+WIN_GREEN    = 0x02
+WIN_LBLUE    = 0x03
+WIN_RED      = 0x04
+WIN_PURPLE   = 0x05
+WIN_YELLOW   = 0x06
+WIN_WHITE    = 0x07
+WIN_GREY     = 0x08
+
+#PRI_A = YELLOW
+#PRI_B = LIGHT_GREEN
+#PRI_C = LIGHT_PURPLE
+#PRI_X = WHITE
+#LATE  = LIGHT_RED
+#COLOR_DONE = DARK_GREY
+
+
+def setTheme(theme):
+    """Set colors for use when printing text"""
+    global PRI_A, PRI_B, PRI_C, PRI_X, DEFAULT, LATE, COLOR_DONE
+
+    # Set the theme from BGCOL environment variable
+    # only set if not set by cmdline flag
+    if not theme and os.environ.has_key('BGCOL'):
+        if os.environ['BGCOL'] == 'light':
+            theme = 'light'
+        elif os.environ['BGCOL'] == 'dark':
+            theme = 'dark'
+
+    # If no theme from cmdline or environment then use default
+    if not theme: theme = defaultTheme
+    
+    if TODOTXT_VERBOSE >=2: print "theme is:", theme
+
+    if theme == "light":
+        if TODOTXT_VERBOSE >=2: print "light"
+        PRI_A = RED
+        PRI_B = GREEN
+        PRI_C = LIGHT_BLUE
+        PRI_X = PURPLE
+        LATE  = LIGHT_RED
+        COLOR_DONE = DARK_GREY
+    elif theme == "dark":
+        if TODOTXT_VERBOSE >=2: print "dark"
+        PRI_A = YELLOW
+        PRI_B = LIGHT_GREEN
+        PRI_C = LIGHT_PURPLE
+        PRI_X = WHITE
+        LATE  = LIGHT_RED
+        COLOR_DONE = DARK_GREY
+    elif theme == "windark" and os.name == 'nt' and not TODOTXT_ANSI: 
+        if TODOTXT_VERBOSE >=2: print "windark/nt"
+        PRI_A = WIN_YELLOW
+        PRI_B = WIN_GREEN
+        PRI_C = WIN_LBLUE
+        PRI_X = WIN_GREY
+        DEFAULT = WIN_WHITE
+        LATE  = WIN_RED
+        COLOR_DONE = WIN_PURPLE 
+    else:
+        if TODOTXT_VERBOSE >=2: print "theme else/none"
+        PRI_A = NONE
+        PRI_B = NONE
+        PRI_C = NONE
+        PRI_X = NONE
+        DEFAULT = NONE
+        LATE = NONE
+        COLOR_DONE = NONE 
+
+
+
 
 # we want a case statement
 # This class provides the functionality we want. You only need to look at
@@ -98,7 +167,23 @@ def readFileToLines(FILE):
     lines=f.readlines()
   return lines
 
+def set_wincolor(color):
+    """ set_wincolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY)"""
+    stdhandle = ctypes.windll.kernel32.GetStdHandle(-11)
+    bool = ctypes.windll.kernel32.SetConsoleTextAttribute(stdhandle, color)
+    return bool
 
+def highlightWindows(matchobj):
+    """color replacement function used when highlighting priorities"""
+    if (matchobj.group(1) == "(A)"):
+        set_wincolor(PRI_A)
+    elif (matchobj.group(1) == "(B)"):
+        set_wincolor(PRI_B)
+    elif (matchobj.group(1) == "(C)"):
+        set_wincolor(PRI_C)
+    else:
+        set_wincolor(PRI_X)
+    return matchobj.group(0)
 
 def highlightPriority(matchobj):
   """color replacement function used when highlighting priorities"""
@@ -186,10 +271,30 @@ def _list(FILE,TERMS):
   re_done = re.compile(r"(^\d+ x .*)")  #need the digit at the beginning cause you shoved in above
   #only after done, show the end results
   for item in SRC:
-    print re_done.sub(highLightDone, 
-                  (re_late2.sub(highlightLate2, 
-                       (re_late.sub(highlightLate, 
-                                    re_pri.sub(highlightPriority, item)))))),  
+    if TODOTXT_PLAIN == 1:
+      print item,
+      if TODOTXT_VERBOSE >= 2 :
+        print "print plain item"
+    elif os.name=="nt" and TODOTXT_ANSI is not 1: 
+      if re_done.match(item):
+        set_wincolor(COLOR_DONE) 
+        print item,
+      elif re_late.match(item): 
+        set_wincolor(LATE) 
+        print item,
+      elif re_late2.match(item): 
+        set_wincolor(LATE) 
+        print item,
+      elif re_pri.match(item): 
+        print re_pri.sub(highlightWindows, item),
+      set_wincolor(DEFAULT)
+      if TODOTXT_VERBOSE >= 2 :
+        print "print NT text item"
+    else:
+      print re_done.sub(highLightDone, 
+                    (re_late2.sub(highlightLate2, 
+                         (re_late.sub(highlightLate, 
+                                      re_pri.sub(highlightPriority, item)))))),  
   if TODOTXT_VERBOSE is not 0:
     print "--"
     print "TODO:", len(SRC), " of ", originalSRCLenth, " tasks shown"
@@ -326,9 +431,11 @@ def main():
   global TODOTXT_VERBOSE,TODOTXT_PLAIN,TODOTXT_CFG_FILE,TODOTXT_FORCE,\
     TODOTXT_PRESERVE_LINE_NUMBERS,TODOTXT_AUTO_ARCHIVE,TODOTXT_DATE_ON_ADD,\
     TODOTXT_DEFAULT_ACTION,TODOTXT_SORT_COMMAND,TODOTXT_FINAL_FILTER, \
-    TODOTXT_SORT_ALPHA
+    TODOTXT_SORT_ALPHA, TODOTXT_ANSI
 
   global PRI_A,PRI_B,PRI_C,PRI_X,LATE,COLOR_DONE 
+
+  theme = None
 
   parser = argparse.ArgumentParser(description='Process some todos.',
                                    formatter_class=argparse.RawTextHelpFormatter) 
@@ -359,8 +466,15 @@ def main():
   parser.add_argument('-A', dest='TODOTXT_SORT_ALPHA', action='store_const',
                    const=1, 
                    help="Sort Alphabetically.  Default is false and list as saved in the file") 
-  parser.add_argument('--writeConfig', dest='TODOTXT_WRITECONFIG', action='store_true',
-                   help="Write the config file from all active configurateion options. This requires at least one positional argument.  Try --writeConfig ls") 
+  parser.add_argument('--ansi', dest='TODOTXT_ANSI', action='store_const',
+                   const=1, 
+                   help="Force the use of ANSI escape charater for color.  Useful in Windows if you are using a Terminal that understands them.") 
+  parser.add_argument('--ansi_theme', dest='TODOTXT_COLOR_THEME', 
+                   choices=['light','dark'], default='None',
+                   help="Pick 'dark' or 'light' theme when using ANSI. Ignored if not.") 
+
+  #parser.add_argument('--writeConfig', dest='TODOTXT_WRITECONFIG', action='store_true',
+                   #help="Write the config file from all active configurateion options. This requires at least one positional argument.  Try --writeConfig ls") 
 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del','rm','depri','dp','help','listall','lsa','listcon','lsc',
@@ -415,6 +529,7 @@ def main():
   TODOTXT_PLAIN=os.environ.get('TODOTXT_PLAIN')               # is same as option -p
   TODOTXT_DATE_ON_ADD=os.environ.get('TODOTXT_DATE_ON_ADD')   # is same as option -t
   TODOTXT_VERBOSE=os.environ.get('TODOTXT_VERBOSE')           # is same as option -v
+  TODOTXT_ANSI=os.environ.get('TODOTXT_ANSI')                 # is same as option --ANSI
 
   if TODOTXT_DIR is None:
     TODOTXT_DIR = os.path.expanduser("~/.todo")
@@ -441,6 +556,8 @@ def main():
   try: 
     cfgparser.read(TODOTXT_CFG_FILE)                    
     param = {k:v for k,v in cfgparser.items('TODO') }
+    if TODOTXT_VERBOSE > 1:
+      print "Config File Parameters",param                            
     if "TODOTXT_AUTO_ARCHIVE".lower() in param:
       TODOTXT_AUTO_ARCHIVE=cfgparser.getint('TODO',"TODOTXT_AUTO_ARCHIVE".lower())
     if "TODOTXT_FORCE".lower() in param:
@@ -455,10 +572,13 @@ def main():
       TODOTXT_DATE_ON_ADD=cfgparser.getint('TODO',"TODOTXT_DATE_ON_ADD".lower())
     if "TODOTXT_SORT_ALPHA".lower() in param:
       TODOTXT_SORT_ALPHA=cfgparser.getint('TODO',"TODOTXT_SORT_ALPHA".lower())
+    if "TODOTXT_ANSI".lower() in param:
+      TODOTXT_ANSI=cfgparser.getint('TODO',"TODOTXT_ANSI".lower())
+    if "TODOTXT_COLOR_THEME".lower() in param:
+      TODOTXT_ANSI=cfgparser.getint('TODO',"TODOTXT_COLOR_THEME".lower())
   except:
     if TODOTXT_VERBOSE >= 2:
-      print "no cfg file to read" #TODO comment this out
-    pass 
+      print "no cfg file to read" 
 
 # Process (the rest of) command line arguments
   if args.TODOTXT_AUTO_ARCHIVE is not None:
@@ -475,22 +595,27 @@ def main():
     TODOTXT_DATE_ON_ADD=args.TODOTXT_DATE_ON_ADD
   if args.TODOTXT_SORT_ALPHA is not None:
     TODOTXT_SORT_ALPHA=args.TODOTXT_SORT_ALPHA
-
+  if args.TODOTXT_ANSI is not None:
+    TODOTXT_ANSI=args.TODOTXT_ANSI
+  if args.TODOTXT_COLOR_THEME is not None:
+    TODOTXT_COLOR_THEME=args.TODOTXT_COLOR_THEME
 
 # Done setting config items:  Start using them
-  if args.TODOTXT_WRITECONFIG is True:
-      print "TODOTXT_WRITECONFIG is True"
-      fConfigWrite=open('TODOTXT_CONFIG','w')
-      cfgparser.write(fConfigWrite)      
+#  if args.TODOTXT_WRITECONFIG is True:
+#      print "TODOTXT_WRITECONFIG is True"
+#      fConfigWrite=open('TODOTXT_CONFIG','w')
+#      cfgparser.write(fConfigWrite)      
 
   if TODOTXT_VERBOSE > 1:
     print "command line args",args
-    print "Config File Parameters",param                            
     print "TODOTXT_CFG_FILE:",TODOTXT_CFG_FILE
     print "TODOTXT_DIR ",TODOTXT_DIR
+    print "TODO_FILE",TODO_FILE
     print "TODOTXT_FORCE",TODOTXT_FORCE  
     print "TODOTXT_DATE_ON_ADD", TODOTXT_DATE_ON_ADD
     print "TODOTXT_SORT_ALPHA", TODOTXT_SORT_ALPHA
+    print "TODOTXT_ANSI", TODOTXT_ANSI
+    print "TODOTXT_COLOR_THEME", TODOTXT_COLOR_THEME
     print "TODOTXT_PLAIN", TODOTXT_PLAIN
     print "TODOTXT_AUTO_ARCHIVE",TODOTXT_AUTO_ARCHIVE
     print "TODOTXT_FORCE",TODOTXT_FORCE 
@@ -499,13 +624,27 @@ def main():
     print "TODOTXT_DATE_ON_ADD",TODOTXT_DATE_ON_ADD
     print "TODOTXT_SORT_ALPHA",TODOTXT_SORT_ALPHA
   
-  if TODOTXT_PLAIN is not 0 and TODOTXT_PLAIN is not None:
-    PRI_A = ''
-    PRI_B = ''
-    PRI_C = ''
-    PRI_X = ''
-    LATE  = ''
-    COLOR_DONE = ''
+  #if TODOTXT_PLAIN is not 0 and TODOTXT_PLAIN is not None:
+    #PRI_A = ''
+    #PRI_B = ''
+    #PRI_C = ''
+    #PRI_X = ''
+    #LATE  = ''
+    #COLOR_DONE = ''
+
+# Set the color theme
+# Windows CMD themes require ctypes module only core > python 2.5
+  #theme=TODOTXT_COLOR_THEME
+  if os.name == 'nt' and not TODOTXT_ANSI:
+      if not theme in ['windark', 'nocolor']:
+          theme = 'windark'
+      try:
+          import ctypes
+          global ctypes
+      except ImportError:
+          theme = 'nocolor'
+  setTheme(theme)
+
 
 #TODO probably need to do some sanity checking here
 
@@ -869,164 +1008,165 @@ def main():
     if case('help'):
       #TODO oneline_usage 
       print """
-		  Usage: $oneline_usage
+  usage: todo.py [-h] [-a] [-d TODOTXT_CFG_FILE] [-f] [-v] [-vv] [-p] [-n] [-t]
+               [-A] [--ansi] [--ansi_theme {light,dark}]
+               action ...
+  Actions:
+    add "THING I NEED TO DO +project @context"
+    a "THING I NEED TO DO +project @context"
+      Adds THING I NEED TO DO to your todo.txt file on its own line.
+      Project and context notation optional.
+      Quotes optional.
 
-		  Actions:
-		    add "THING I NEED TO DO +project @context"
-		    a "THING I NEED TO DO +project @context"
-		      Adds THING I NEED TO DO to your todo.txt file on its own line.
-		      Project and context notation optional.
-		      Quotes optional.
+    addm "FIRST THING I NEED TO DO +project1 @context
+    SECOND THING I NEED TO DO +project2 @context"
+      Adds FIRST THING I NEED TO DO to your todo.txt on its own line and
+      Adds SECOND THING I NEED TO DO to you todo.txt on its own line.
+      Project and context notation optional.
+      Quotes optional.
 
-		    addm "FIRST THING I NEED TO DO +project1 @context
-		    SECOND THING I NEED TO DO +project2 @context"
-		      Adds FIRST THING I NEED TO DO to your todo.txt on its own line and
-		      Adds SECOND THING I NEED TO DO to you todo.txt on its own line.
-		      Project and context notation optional.
-		      Quotes optional.
+    addto DEST "TEXT TO ADD"
+      Adds a line of text to any file located in the todo.txt directory.
+      For example, addto inbox.txt "decide about vacation"
 
-		    addto DEST "TEXT TO ADD"
-		      Adds a line of text to any file located in the todo.txt directory.
-		      For example, addto inbox.txt "decide about vacation"
+    append ITEM# "TEXT TO APPEND"
+    app ITEM# "TEXT TO APPEND"
+      Adds TEXT TO APPEND to the end of the task on line ITEM#.
+      Quotes optional.
 
-		    append ITEM# "TEXT TO APPEND"
-		    app ITEM# "TEXT TO APPEND"
-		      Adds TEXT TO APPEND to the end of the task on line ITEM#.
-		      Quotes optional.
+    archive
+      Moves all done tasks from todo.txt to done.txt and removes blank lines.
 
-		    archive
-		      Moves all done tasks from todo.txt to done.txt and removes blank lines.
+    command [ACTIONS]
+      Runs the remaining arguments using only todo.sh builtins.
+      Will not call any .todo.actions.d scripts.
 
-		    command [ACTIONS]
-		      Runs the remaining arguments using only todo.sh builtins.
-		      Will not call any .todo.actions.d scripts.
+    del ITEM# [TERM]
+    rm ITEM# [TERM]
+      Deletes the task on line ITEM# in todo.txt.
+      If TERM specified, deletes only TERM from the task.
 
-		    del ITEM# [TERM]
-		    rm ITEM# [TERM]
-		      Deletes the task on line ITEM# in todo.txt.
-		      If TERM specified, deletes only TERM from the task.
+    depri ITEM#[, ITEM#, ITEM#, ...]
+    dp ITEM#[, ITEM#, ITEM#, ...]
+      Deprioritizes (removes the priority) from the task(s)
+      on line ITEM# in todo.txt.
 
-		    depri ITEM#[, ITEM#, ITEM#, ...]
-		    dp ITEM#[, ITEM#, ITEM#, ...]
-		      Deprioritizes (removes the priority) from the task(s)
-		      on line ITEM# in todo.txt.
+    do ITEM#[, ITEM#, ITEM#, ...]
+      Marks task(s) on line ITEM# as done in todo.txt.
 
-		    do ITEM#[, ITEM#, ITEM#, ...]
-		      Marks task(s) on line ITEM# as done in todo.txt.
+    help
+      Display this help message.
 
-		    help
-		      Display this help message.
+    list [TERM...]
+    ls [TERM...]
+      Displays all tasks that contain TERM(s) sorted by priority with line
+      numbers.  If no TERM specified, lists entire todo.txt.
 
-		    list [TERM...]
-		    ls [TERM...]
-		      Displays all tasks that contain TERM(s) sorted by priority with line
-		      numbers.  If no TERM specified, lists entire todo.txt.
+    listall [TERM...]
+    lsa [TERM...]
+      Displays all the lines in todo.txt AND done.txt that contain TERM(s)
+      sorted by priority with line  numbers.  If no TERM specified, lists
+      entire todo.txt AND done.txt concatenated and sorted.
 
-		    listall [TERM...]
-		    lsa [TERM...]
-		      Displays all the lines in todo.txt AND done.txt that contain TERM(s)
-		      sorted by priority with line  numbers.  If no TERM specified, lists
-		      entire todo.txt AND done.txt concatenated and sorted.
+    listcon
+    lsc
+      Lists all the task contexts that start with the @ sign in todo.txt.
 
-		    listcon
-		    lsc
-		      Lists all the task contexts that start with the @ sign in todo.txt.
+    listfile SRC [TERM...]
+    lf SRC [TERM...]
+      Displays all the lines in SRC file located in the todo.txt directory,
+      sorted by priority with line  numbers.  If TERM specified, lists
+      all lines that contain TERM in SRC file.
 
-		    listfile SRC [TERM...]
-		    lf SRC [TERM...]
-		      Displays all the lines in SRC file located in the todo.txt directory,
-		      sorted by priority with line  numbers.  If TERM specified, lists
-		      all lines that contain TERM in SRC file.
+    listpri [PRIORITY]
+    lsp [PRIORITY]
+      Displays all tasks prioritized PRIORITY.
+      If no PRIORITY specified, lists all prioritized tasks.
 
-		    listpri [PRIORITY]
-		    lsp [PRIORITY]
-		      Displays all tasks prioritized PRIORITY.
-		      If no PRIORITY specified, lists all prioritized tasks.
+    listproj
+    lsprj
+      Lists all the projects that start with the + sign in todo.txt.
 
-		    listproj
-		    lsprj
-		      Lists all the projects that start with the + sign in todo.txt.
+    move ITEM# DEST [SRC]
+    mv ITEM# DEST [SRC]
+      Moves a line from source text file (SRC) to destination text file (DEST).
+      Both source and destination file must be located in the directory defined
+      in the configuration directory.  When SRC is not defined
+      it's by default todo.txt.
 
-		    move ITEM# DEST [SRC]
-		    mv ITEM# DEST [SRC]
-		      Moves a line from source text file (SRC) to destination text file (DEST).
-		      Both source and destination file must be located in the directory defined
-		      in the configuration directory.  When SRC is not defined
-		      it's by default todo.txt.
+    prepend ITEM# "TEXT TO PREPEND"
+    prep ITEM# "TEXT TO PREPEND"
+      Adds TEXT TO PREPEND to the beginning of the task on line ITEM#.
+      Quotes optional.
 
-		    prepend ITEM# "TEXT TO PREPEND"
-		    prep ITEM# "TEXT TO PREPEND"
-		      Adds TEXT TO PREPEND to the beginning of the task on line ITEM#.
-		      Quotes optional.
+    pri ITEM# PRIORITY
+    p ITEM# PRIORITY
+      Adds PRIORITY to task on line ITEM#.  If the task is already
+      prioritized, replaces current priority with new PRIORITY.
+      PRIORITY must be an uppercase letter between A and Z.
 
-		    pri ITEM# PRIORITY
-		    p ITEM# PRIORITY
-		      Adds PRIORITY to task on line ITEM#.  If the task is already
-		      prioritized, replaces current priority with new PRIORITY.
-		      PRIORITY must be an uppercase letter between A and Z.
+    replace ITEM# "UPDATED TODO"
+      Replaces task on line ITEM# with UPDATED TODO.
 
-		    replace ITEM# "UPDATED TODO"
-		      Replaces task on line ITEM# with UPDATED TODO.
-
-		    report
-		      Adds the number of open tasks and done tasks to report.txt.
+    report
+      Adds the number of open tasks and done tasks to report.txt.
 
 
 
-		  Options:
-		    -@
-		        Hide context names in list output. Use twice to show context
-		        names (default).
-		    -+
-		        Hide project names in list output. Use twice to show project
-		        names (default).
-		    -d CONFIG_FILE
-		        Use a configuration file other than the default ~/.todo/config
-		    -f
-		        Forces actions without confirmation or interactive input
-		    -h
-		        Display a short help message
-		    -p
-		        Plain mode turns off colors
-		    -P
-		        Hide priority labels in list output. Use twice to show
-		        priority labels (default).
-		    -a
-		        Don't auto-archive tasks automatically on completion
-		    -n
-		        Don't preserve line numbers; automatically remove blank lines
-		        on task deletion
-		    -t
-		        Prepend the current date to a task automatically
-		        when it's added.
-		    -v
-		        Verbose mode turns on confirmation messages
-		    -vv
-		        Extra verbose mode prints some debugging information
+  Options:
+    -@
+        Hide context names in list output. Use twice to show context
+        names (default).
+    -+
+        Hide project names in list output. Use twice to show project
+        names (default).
+    -d CONFIG_FILE
+        Use a configuration file other than the default ~/.todo/config
+    -f
+        Forces actions without confirmation or interactive input
+    -h
+        Display a short help message
+    -p
+        Plain mode turns off colors
+    -P
+        Hide priority labels in list output. Use twice to show
+        priority labels (default).
+    -a
+        Don't auto-archive tasks automatically on completion
+    -n
+        Don't preserve line numbers; automatically remove blank lines
+        on task deletion
+    -t
+        Prepend the current date to a task automatically
+        when it's added.
+    -v
+        Verbose mode turns on confirmation messages
+    -vv
+        Extra verbose mode prints some debugging information
+    -V
+        Displays version, license and credits
             (not implemented)
-		    -V
-		        Displays version, license and credits
-            (not implemented)
-		    -x
-		        Disables TODOTXT_FINAL_FILTER
-
+    --ansi                
+            Force the use of ANSI escape charater for color.  Useful in Windows if you are using a Terminal that understands them.      
+        --ansi_theme {light,dark} 
+             Pick 'dark' or 'light' theme when using ANSI. Ignored if not.                                                               
       Extras:
         Due dates:  You can add a due date and it will be colored red if due today or before.
                     Format is:
                       due:YYYY-MM-DD or due:YYYY-MM-DD HH:mm
                     Ex: due:2013-01-31 or due:2013-01-31 01:00
 
-		  Environment variables:
-		    TODOTXT_AUTO_ARCHIVE=0          is same as option -a
-		    TODOTXT_CFG_FILE=CONFIG_FILE    is same as option -d CONFIG_FILE
-		    TODOTXT_FORCE=1                 is same as option -f
-		    TODOTXT_PRESERVE_LINE_NUMBERS=0 is same as option -n
-		    TODOTXT_PLAIN=1                 is same as option -p
-		    TODOTXT_DATE_ON_ADD=1           is same as option -t
-		    TODOTXT_VERBOSE=1               is same as option -v
-		    TODOTXT_DEFAULT_ACTION=""       run this when called with no arguments
-		    TODOTXT_SORT_COMMAND="sort ..." customize list output
-		    TODOTXT_FINAL_FILTER="sed ..."  customize list after color, P@+ hiding
+      Environment variables:
+        TODOTXT_AUTO_ARCHIVE=0          is same as option -a
+        TODOTXT_CFG_FILE=CONFIG_FILE    is same as option -d CONFIG_FILE
+        TODOTXT_FORCE=1                 is same as option -f
+        TODOTXT_PRESERVE_LINE_NUMBERS=0 is same as option -n
+        TODOTXT_PLAIN=1                 is same as option -p
+        TODOTXT_DATE_ON_ADD=1           is same as option -t
+        TODOTXT_VERBOSE=1               is same as option -v
+        TODOTXT_COLOR_THEME=light       is same as option --ansi_theme {light,dark}
+        TODOTXT_ANSI=1                  is same as option --ansi
+
 	EndHelp
 
 

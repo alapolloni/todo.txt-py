@@ -1,4 +1,4 @@
-# ya(yet another) todotxt python implementation   #
+# yaya(yet another) todotxt python implementation   #
 ## WHAT and WHY ##
 - Doesn't rely on any gnu programs 
 - There's a windows .exe included for windows users who are interested but don't want or cannot installing/configure Cygwin.
