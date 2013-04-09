@@ -13,9 +13,14 @@
 5. Then: try *t help*
 6. Then: *t add "read todo.txt help text"*
 7. And then: *t ls*
-4. Look at autorun.bat.  It should be self explanatory how to add more aliases and environment variables
+4. Look at autorun.bat.  It should be self explanatory how to add more aliases and environment variables.
 
-If you are using an ANSI compatible Terminal as a replacement for Window's cmd.exe you should use the --ansi switch or set TODOTXT_ANSI=1 via an environtment variable or a Config file.
+If you are using an ANSI compatible Terminal as a replacement for Window's cmd.exe you should use the --ansi switch or set TODOTXT_ANSI=1 via an environment variable or a Config file.  
+
+## *NIX/OSX Installation ##
+-  SAVE AS [todo.py](todo.py) to a directory that's in your path.
+-  This assumes that you have python already installed (which is normally the case)
+-  If you don't know about aliases, *google linux alias* or *osx aliases*
 
 ## TODO/ISSUES ##
 -  review the --help output
