@@ -5,7 +5,8 @@
 - I wanted to learn python.
 - Mostly a copy of todo.sh.
 
-## Windows Installation ##
+## Installation ##
+### Windows Installation ###
 1. SAVE AS [todo.exe](todo.exe) to your home directory ( C:\Users\\{your login id\}\ )
 2. Follow these [instructions](/Notes/WindowsAliases.md)
 3. Open a new cmd.exe
@@ -17,15 +18,23 @@
 
 If you are using an ANSI compatible Terminal as a replacement for Window's cmd.exe you should use the --ansi switch or set TODOTXT_ANSI=1 via an environment variable or a Config file.  
 
-## *NIX/OSX Installation ##
+### *NIX/OSX Installation ###
 -  SAVE AS [todo.py](todo.py) to a directory that's in your path.
 -  This assumes that you have python already installed (which is normally the case)
 -  If you don't know about aliases, *google linux alias* or *osx aliases*
 
+### Extras for Either ###
+-  defaults can be set via either environment variables or a config file.
+-  a list of environment variables is listed in the help text outputed from *todo help*
+-  an example config file is here: [todo.cfg](todo.cfg)
+
+## Attribution ##
+- This is a conversion of https://github.com/ginatrapani/todo.txt-cli/blob/master/todo.sh
+- Most of the colorization code originally came from https://github.com/abztrakt/ya-todo-py/blob/master/todo.py. ( which i think came from Shane Koster <shane.koster@gmail.com> )
+
 ## TODO/ISSUES ##
 
 -  add sanity checks like in todo.sh
--  check example cfg file has everything
 -  add e for edit todo.txt in editor
 -  add action add-on ability.  Like PV(project view) add-on. 
 -  add birdseye and stuff 
@@ -70,7 +79,7 @@ If you are using an ANSI compatible Terminal as a replacement for Window's cmd.e
 	-    TODOTXT_ANSI & --ansi
 -  Added version info via *todo version*
 -  review the --help output
-
+-  check example cfg file has everything
 
 ## notes ##
 ### Configuration Value Precedence ###
@@ -82,8 +91,6 @@ If you are using an ANSI compatible Terminal as a replacement for Window's cmd.e
 1. Defaults set internally to the program.
 
 
-## Attribution ##
-- This is a conversion of https://github.com/ginatrapani/todo.txt-cli/blob/master/todo.sh
-- Most of the colorization code originally came from https://github.com/abztrakt/ya-todo-py/blob/master/todo.py. ( which i think came from Shane Koster <shane.koster@gmail.com> )
+
 
 
