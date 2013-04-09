@@ -1033,13 +1033,6 @@ More information and mailing list at http://todotxt.com
       Project and context notation optional.
       Quotes optional.
 
-    addm "FIRST THING I NEED TO DO +project1 @context
-    SECOND THING I NEED TO DO +project2 @context"
-      Adds FIRST THING I NEED TO DO to your todo.txt on its own line and
-      Adds SECOND THING I NEED TO DO to you todo.txt on its own line.
-      Project and context notation optional.
-      Quotes optional.
-
     addto DEST "TEXT TO ADD"
       Adds a line of text to any file located in the todo.txt directory.
       For example, addto inbox.txt "decide about vacation"
@@ -1051,10 +1044,6 @@ More information and mailing list at http://todotxt.com
 
     archive
       Moves all done tasks from todo.txt to done.txt and removes blank lines.
-
-    command [ACTIONS]
-      Runs the remaining arguments using only todo.sh builtins.
-      Will not call any .todo.actions.d scripts.
 
     del ITEM# [TERM]
     rm ITEM# [TERM]
@@ -1088,7 +1077,7 @@ More information and mailing list at http://todotxt.com
       Lists all the task contexts that start with the @ sign in todo.txt.
 
     listfile SRC [TERM...]
-    lf SRC [TERM...]
+    lsf SRC [TERM...]
       Displays all the lines in SRC file located in the todo.txt directory,
       sorted by priority with line  numbers.  If TERM specified, lists
       all lines that contain TERM in SRC file.
@@ -1129,12 +1118,6 @@ More information and mailing list at http://todotxt.com
 
 
   Options:
-    -@
-        Hide context names in list output. Use twice to show context
-        names (default).
-    -+
-        Hide project names in list output. Use twice to show project
-        names (default).
     -d CONFIG_FILE
         Use a configuration file other than the default ~/.todo/config
     -f
@@ -1158,9 +1141,6 @@ More information and mailing list at http://todotxt.com
         Verbose mode turns on confirmation messages
     -vv
         Extra verbose mode prints some debugging information
-    -V
-        Displays version, license and credits
-
     --ansi                
             Force the use of ANSI escape charater for color.  Useful in Windows if you are using a Terminal that understands them.      
         --ansi_theme {light,dark} 

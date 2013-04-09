@@ -23,8 +23,9 @@ If you are using an ANSI compatible Terminal as a replacement for Window's cmd.e
 -  If you don't know about aliases, *google linux alias* or *osx aliases*
 
 ## TODO/ISSUES ##
--  review the --help output
+
 -  add sanity checks like in todo.sh
+-  check example cfg file has everything
 -  add e for edit todo.txt in editor
 -  add action add-on ability.  Like PV(project view) add-on. 
 -  add birdseye and stuff 
@@ -68,6 +69,7 @@ If you are using an ANSI compatible Terminal as a replacement for Window's cmd.e
 	-    TODOTXT_COLOR_THEME & --ansi_theme {light,dark}
 	-    TODOTXT_ANSI & --ansi
 -  Added version info via *todo version*
+-  review the --help output
 
 
 ## notes ##
