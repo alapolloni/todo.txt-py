@@ -3,6 +3,18 @@
 #format rules
 #https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format 
 
+
+"""
+TODO.TXT Manager - Python Version (no GNU util requirements)
+Author          : Alex Apolloni <apolloni@yahoo.com> 
+Concept by      : Gina Trapani <ginatrapani@gmail.com>
+License         : GPL, http://www.gnu.org/copyleft/gpl.html
+More info       : http://todotxt.com
+Todo File Format: https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format 
+Project Page    : https://github.com/alapolloni/todo.txt-py
+"""
+
+
 #standard libs
 import argparse
 #from argparse import RawTextHelpFormatter
@@ -80,7 +92,6 @@ WIN_GREY     = 0x08
 #PRI_X = WHITE
 #LATE  = LIGHT_RED
 #COLOR_DONE = DARK_GREY
-
 
 def setTheme(theme):
     """Set colors for use when printing text"""
@@ -481,7 +492,7 @@ def main():
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del','rm','depri','dp','help','listall','lsa','listcon','lsc',
                    'listfile','lsf','listpri','lsp','listproj','lsprj', 
-                   'move','mv','prepend','prep','pri','replace','p','report','test']
+                   'move','mv','prepend','prep','pri','replace','p','report','version']
   parser.add_argument(dest='actions',metavar='action', 
                       choices=list_of_choices,
                       default=argparse.SUPPRESS,
@@ -506,10 +517,8 @@ def main():
                       'pri|p ITEM#  PRIORITY\n'  
                       'replace ITEM# "TEXT TO REPLACE"\n'
                       'report\n'
+                      'version\n'
                       )
-                      #TODO
-                      #help
-                      #report
   parser.add_argument(dest='remainingArguments',metavar='See "help" for more details', 
                       nargs=argparse.REMAINDER, default=argparse.SUPPRESS)
   args=parser.parse_args()
@@ -692,7 +701,8 @@ def main():
           #1, just cycle through the priorities...
           #2, do it yourself this one time
           #3, rething the escape...
-          print "error: this doesn't do what you think it should"
+          if TODOTXT_VERBOSE >= 2 :
+            print "error: this doesn't do what you think it should.  It shows items with a ("
           _list(TODO_FILE,'(')
           #for i in range(ord('a'),ord('z')+1): 
             #listPRI=[ '('+chr(i).upper()+')' ]
@@ -813,6 +823,7 @@ def main():
         file.writelines(lines)
 
       break
+
     if case('add','a'):
         _add(TODO_FILE,args.remainingArguments)
         break
@@ -978,12 +989,6 @@ def main():
         file.writelines(lines)
       break
 
-    if case('test'):
-      lines=readFileToLines(TODO_FILE)  
-      print "lines:",
-      print lines
-      break
-
     if case('report'):
       _archive(TODO_FILE,DONE_FILE)
       total=sum(1 for line in open(TODO_FILE))
@@ -1006,7 +1011,15 @@ def main():
       with open(REPORT_FILE, 'r') as f:
         print f.read()
       break
-
+    if case('version'):
+      print """TODO.TXT Command Line Interface (in Python) version 1
+First Release : 2013-04-08 
+Project/Code Page : https://github.com/alapolloni/todo.txt-py
+Original conception by : Gina Trapani (http://ginatrapani.org)
+License : GPL, http://www.gnu.org/copyleft/gpl.html
+More information and mailing list at http://todotxt.com
+"""
+      break
     if case('help'):
       #TODO oneline_usage 
       print """
@@ -1147,7 +1160,7 @@ def main():
         Extra verbose mode prints some debugging information
     -V
         Displays version, license and credits
-            (not implemented)
+
     --ansi                
             Force the use of ANSI escape charater for color.  Useful in Windows if you are using a Terminal that understands them.      
         --ansi_theme {light,dark} 

@@ -24,7 +24,6 @@ If you are using an ANSI compatible Terminal as a replacement for Window's cmd.e
 
 ## TODO/ISSUES ##
 -  review the --help output
--  add version info from -V, -version
 -  add sanity checks like in todo.sh
 -  add e for edit todo.txt in editor
 -  add action add-on ability.  Like PV(project view) add-on. 
@@ -54,7 +53,7 @@ If you are using an ANSI compatible Terminal as a replacement for Window's cmd.e
 - fix _list 
 	- 	 Added -A for sort Alphabetically
 	- 	 ignores date and case 
-	- 	-(sorta)fix listpri (needs _list to be fixed)
+	- 	-(sorta)fix listpri (hacky).
 -  document due:XXXX-XX-XX and due:XXXX-XX-XX XX:XX
 -  make for the .exe
 -  add due:tomorrow, and the week days
@@ -68,6 +67,7 @@ If you are using an ANSI compatible Terminal as a replacement for Window's cmd.e
 -  Add Windows color for both ANSI Terminals and default cmd.exe.
 	-    TODOTXT_COLOR_THEME & --ansi_theme {light,dark}
 	-    TODOTXT_ANSI & --ansi
+-  Added version info via *todo version*
 
 
 ## notes ##
@@ -81,4 +81,7 @@ If you are using an ANSI compatible Terminal as a replacement for Window's cmd.e
 
 
 ## Attribution ##
-- All the colorization code came from https://github.com/abztrakt/ya-todo-py/blob/master/todo.py .
+- This is conversion of https://github.com/ginatrapani/todo.txt-cli/blob/master/todo.sh
+- Most of the colorization code originally came from https://github.com/abztrakt/ya-todo-py/blob/master/todo.py. ( which i think came from Shane Koster <shane.koster@gmail.com> )
+
+
