@@ -83,7 +83,7 @@ If you are using an ANSI compatible Terminal as a replacement for Window's cmd.e
 
 
 ## Attribution ##
-- This is conversion of https://github.com/ginatrapani/todo.txt-cli/blob/master/todo.sh
+- This is a conversion of https://github.com/ginatrapani/todo.txt-cli/blob/master/todo.sh
 - Most of the colorization code originally came from https://github.com/abztrakt/ya-todo-py/blob/master/todo.py. ( which i think came from Shane Koster <shane.koster@gmail.com> )
 
 
