@@ -64,6 +64,9 @@
 -  append: check ITEM# is an integer and within range.
 -  test for tododir,etc and set home and default location/files
 -  look for the config file in a default TODO.sh-ish location.
+-  Add Windows color for both ANSI Terminals and default cmd.exe.
+	-    TODOTXT_COLOR_THEME & --ansi_theme {light,dark}
+	-    TODOTXT_ANSI & --ansi
 
 ## notes ##
 ### Configuration Value Precedence ###
@@ -73,3 +76,7 @@
 1. Local config file (if exists)
 1. Global config file (if exists)
 1. Defaults set internally to the program.
+
+
+## Attribution ##
+- All the colorization code came from https://github.com/abztrakt/ya-todo-py/blob/master/todo.py .
