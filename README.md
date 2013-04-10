@@ -7,7 +7,7 @@
 
 ## Installation ##
 ### Windows Installation ###
-1. SAVE AS [todo.exe](todo.exe) to your home directory ( C:\Users\\{your login id\}\ )
+1. SAVE AS [todo.exe](https://github.com/alapolloni/todo.txt-py/raw/master/todo.exe) to your home directory ( C:\Users\\{your login id\}\ )
 2. Follow these [instructions](/Notes/WindowsAliases.md)
 3. Open a new cmd.exe
 4. Type: the letter *t*.  This will run the todo command.
