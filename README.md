@@ -30,10 +30,10 @@ If you are using an ANSI compatible Terminal as a replacement for Window's cmd.e
 
 ## Attribution ##
 - This is a conversion of https://github.com/ginatrapani/todo.txt-cli/blob/master/todo.sh
-- Most of the colorization code originally came from https://github.com/abztrakt/ya-todo-py/blob/master/todo.py. ( which i think came from Shane Koster <shane.koster@gmail.com> )
+- Most of the colorization code originally came from https://github.com/abztrakt/ya-todo-py/blob/master/todo.py(which i think came from Shane Koster <shane.koster@gmail.com> ).
 
 ## TODO/ISSUES ##
-
+-  (re?) prioritizing adds an odd space after the priority
 -  add sanity checks like in todo.sh
 -  add e for edit todo.txt in editor
 -  add action add-on ability.  Like PV(project view) add-on. 
