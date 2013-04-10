@@ -1,6 +1,7 @@
 #Random scripts
 #
 *.txt
+*.html
 a.py
 build
 color.py
