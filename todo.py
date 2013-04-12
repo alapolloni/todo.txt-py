@@ -287,10 +287,12 @@ def _list(FILE,TERMS):
       if TODOTXT_VERBOSE >= 2 :
         print "print NT text item"
     else:
-      print re_done.sub(highLightDone, 
-                    (re_late2.sub(highlightLate2, 
+      if re_done.match(item):
+        print re_done.sub(highLightDone, item),
+      else: 
+        print (re_late2.sub(highlightLate2, 
                          (re_late.sub(highlightLate, 
-                                      re_pri.sub(highlightPriority, item)))))),  
+                                      re_pri.sub(highlightPriority, item))))),  
   if TODOTXT_VERBOSE is not 0:
     print "--"
     print "TODO:", len(SRC), " of ", originalSRCLenth, " tasks shown"
@@ -583,6 +585,7 @@ def main():
     TODOTXT_COLOR_THEME=args.TODOTXT_COLOR_THEME
 
   if TODOTXT_VERBOSE > 1:
+    print "DEBUG: path and executable is:",os.path.abspath(sys.argv[0]) , sys.argv[0]
     print "command line args",args
     print "TODOTXT_CFG_FILE:",TODOTXT_CFG_FILE
     print "TODOTXT_DIR ",TODOTXT_DIR
@@ -599,7 +602,8 @@ def main():
     print "TODOTXT_PRESERVE_LINE_NUMBERS",TODOTXT_PRESERVE_LINE_NUMBERS
     print "TODOTXT_DATE_ON_ADD",TODOTXT_DATE_ON_ADD
     print "TODOTXT_SORT_ALPHA",TODOTXT_SORT_ALPHA
-  
+
+ 
 # Set the color theme
 # Windows CMD themes require ctypes module only core > python 2.5
   #theme=TODOTXT_COLOR_THEME
@@ -1127,6 +1131,8 @@ More information and mailing list at http://todotxt.com
 
 # This is the standard boilerplate that calls the main() function.
 if __name__ == '__main__':
+
+  
   main()
 
 
