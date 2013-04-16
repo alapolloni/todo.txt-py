@@ -515,10 +515,13 @@ def main():
   TODOTXT_VERBOSE=os.environ.get('TODOTXT_VERBOSE')           # is same as option -v
   TODOTXT_ANSI=os.environ.get('TODOTXT_ANSI')                 # is same as option --ANSI
 
+  
   if TODOTXT_DIR is None:
     TODOTXT_DIR = os.path.expanduser("~/.todo")
+    if TODOTXT_VERBOSE >= 2:
+      print "After positive  check against None: TODOTXT_DIR is:",TODOTXT_DIR 
   elif TODOTXT_VERBOSE >= 2:
-    print "After negative check against None: TODOTXT_DIR is:",TODOTXT_DIR 
+    print "After negative check against Non:TODOTXT_DIR:",TODOTXT_DIR     
   TODO_FILE=TODOTXT_DIR+"/todo.txt"
   DONE_FILE=TODOTXT_DIR+"/done.txt"
   REPORT_FILE=TODOTXT_DIR+"/report.txt"
@@ -618,6 +621,14 @@ def main():
   setTheme(theme)
 
 #TODO probably need to do some sanity checking here
+
+  if not os.path.isdir(TODOTXT_DIR):
+    print'Directory TODOTXT_DIR ('+TODOTXT_DIR+') does not exist.'
+    input = raw_input('Create it? (Y/n):')
+    if input == 'Y':
+      os.makedirs(TODOTXT_DIR)
+    else:
+      sys.exit("Please verify that the directory in TODOTXT_DIR exists.")
 
 # Collected arguments - ready to process actions
   for case in switch(args.actions):
