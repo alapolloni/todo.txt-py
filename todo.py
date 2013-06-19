@@ -2,11 +2,11 @@
 
 """
 TODO.TXT Manager - Python Version (no GNU util requirements)
-Author          : Alex Apolloni <apolloni@yahoo.com> 
+Author          : Alex Apolloni <apolloni@yahoo.com>
 Concept by      : Gina Trapani <ginatrapani@gmail.com>
 License         : GPL, http://www.gnu.org/copyleft/gpl.html
 More info       : http://todotxt.com
-Todo File Format: https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format 
+Todo File Format: https://github.com/ginatrapani/todo.txt-cli/wiki/The-Todo.txt-Format
 Project Page    : https://github.com/alapolloni/todo.txt-py
 """
 
@@ -18,23 +18,34 @@ import os
 import re
 import datetime
 from datetime import date
-from ConfigParser import ConfigParser    
+from ConfigParser import ConfigParser
 
-# defaults if not yet defined, 
+# defaults if not yet defined,
 # why would they be defined? hmm...?
 try: TODOTXT_VERBOSE
 except: TODOTXT_VERBOSE = 1
 try: TODOTXT_PLAIN
 except: TODOTXT_PLAIN = 0
 try: TODOTXT_CFG_FILE
-except: 
-  TODOTXT_CFG_FILE=os.environ['HOME']+'/.todo/config'
+except:
+    home = ''
+    # Windows doesn't usually define %HOME% so check
+    # that it exists before using it.
+    if os.environ.__contains__('HOME'):
+        home = os.environ['HOME']
+    # Alternative for windows computers
+    elif (os.environ.__contains__('HOMEDRIVE') and os.environ.__contains__('HOMEPATH')):
+        home = os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']
+    else:
+        raise Exception("Unable to determine home directory automatically.")
+
+    TODOTXT_CFG_FILE = os.path.join(home, '.todo/config')
 try: TODOTXT_FORCE
 except: TODOTXT_FORCE = 0
 try: TODOTXT_PRESERVE_LINE_NUMBERS
 except: TODOTXT_PRESERVE_LINE_NUMBERS = 0
 try: TODOTXT_AUTO_ARCHIVE
-except: TODOTXT_AUTO_ARCHIVE = 0 
+except: TODOTXT_AUTO_ARCHIVE = 0
 try: TODOTXT_DATE_ON_ADD
 except: TODOTXT_DATE_ON_ADD = 0
 try: TODOTXT_DEFAULT_ACTION
@@ -100,7 +111,7 @@ def setTheme(theme):
 
     # If no theme from cmdline or environment then use default
     if not theme: theme = defaultTheme
-    
+
     if TODOTXT_VERBOSE >=2: print "theme is:", theme
 
     if theme == "light":
@@ -119,7 +130,7 @@ def setTheme(theme):
         PRI_X = WHITE
         LATE  = LIGHT_RED
         COLOR_DONE = DARK_GREY
-    elif theme == "windark" and os.name == 'nt' and not TODOTXT_ANSI: 
+    elif theme == "windark" and os.name == 'nt' and not TODOTXT_ANSI:
         if TODOTXT_VERBOSE >=2: print "windark/nt"
         PRI_A = WIN_YELLOW
         PRI_B = WIN_GREEN
@@ -127,7 +138,7 @@ def setTheme(theme):
         PRI_X = WIN_GREY
         DEFAULT = WIN_WHITE
         LATE  = WIN_RED
-        COLOR_DONE = WIN_PURPLE 
+        COLOR_DONE = WIN_PURPLE
     else:
         if TODOTXT_VERBOSE >=2: print "theme else/none"
         PRI_A = NONE
@@ -136,7 +147,7 @@ def setTheme(theme):
         PRI_X = NONE
         DEFAULT = NONE
         LATE = NONE
-        COLOR_DONE = NONE 
+        COLOR_DONE = NONE
 
 # we want a case statement
 # This class provides the functionality we want. You only need to look at
@@ -151,7 +162,7 @@ class switch(object):
         """Return the match method once, then stop"""
         yield self.match
         raise StopIteration
-    
+
     def match(self, *args):
         """Indicate whether or not to enter a case suite"""
         if self.fall or not args:
@@ -220,12 +231,12 @@ def _list(FILE,TERMS):
   if os.path.isfile(FILE): src=FILE
   elif os.path.isfile(FILE): src=FILE
   else: sys.exit("TODO: File "+FILE+' does not exist.  Check TODO_DIR location OR use "todo add My1stTodo".' )
-    
+
   f=open(FILE,'r')
   SRC=f.readlines()
 
   ## Figure out how much padding we need to use
-  ## We need one level of padding for each power of 10 LINES used 
+  ## We need one level of padding for each power of 10 LINES used
   LINES=len(SRC)
   PADDING=len(str(LINES))
   if TODOTXT_VERBOSE >=2:
@@ -235,11 +246,11 @@ def _list(FILE,TERMS):
     #SRC[x]=str(x+1)+" "*PADDING+SRC[x]
     SRC[x]=str(x+1).zfill(PADDING)+" "+SRC[x]
     #SRC[x]="%3d: %s" % (x+1, v)
-  originalSRCLenth=len(SRC) 
+  originalSRCLenth=len(SRC)
 
   #each time through the FOR loop cuts down SRC
   for TERM in TERMS:
-    if re.match('-',TERM): 
+    if re.match('-',TERM):
       TERM=TERM[1:]
       if TODOTXT_VERBOSE == 1:
         print "return all without TERM:"+TERM
@@ -254,11 +265,11 @@ def _list(FILE,TERMS):
     #PADDING+1 is the 1st character of the item (without the line number)
     #and then lower you ignore case.  (this might be wrong for non-ASCII non-english todos
     SRC.sort(key=lambda x: x[PADDING+1:].lower())
-    #SRC.sort(key=str.lower)    
+    #SRC.sort(key=str.lower)
     #SRC.sort(key=lambda x: x[PADDING+1:])
 
-  #add colors , compile regex that we will search for.  
-  re_pri = re.compile(r".*(\([A-Z]\)).*") 
+  #add colors , compile regex that we will search for.
+  re_pri = re.compile(r".*(\([A-Z]\)).*")
   re_late = re.compile(r"(.*)due:(....)-(..)-(..)(.*)")
   re_late2 = re.compile(r"(.*)due: (....)-(..)-(..) (..):(..)(.*)")
   re_anyext = re.compile(r"\{[^\}]*\}")
@@ -269,17 +280,17 @@ def _list(FILE,TERMS):
       print item,
       if TODOTXT_VERBOSE >= 2 :
         print "print plain item"
-    elif os.name=="nt" and TODOTXT_ANSI is not 1: 
+    elif os.name=="nt" and TODOTXT_ANSI is not 1:
       if re_done.match(item):
-        set_wincolor(COLOR_DONE) 
+        set_wincolor(COLOR_DONE)
         print item,
-      elif re_late.match(item): 
-        set_wincolor(LATE) 
+      elif re_late.match(item):
+        set_wincolor(LATE)
         print item,
-      elif re_late2.match(item): 
-        set_wincolor(LATE) 
+      elif re_late2.match(item):
+        set_wincolor(LATE)
         print item,
-      elif re_pri.match(item): 
+      elif re_pri.match(item):
         print re_pri.sub(highlightWindows, item),
       else:
         print item,
@@ -289,10 +300,10 @@ def _list(FILE,TERMS):
     else:
       if re_done.match(item):
         print re_done.sub(highLightDone, item),
-      else: 
-        print (re_late2.sub(highlightLate2, 
-                         (re_late.sub(highlightLate, 
-                                      re_pri.sub(highlightPriority, item))))),  
+      else:
+        print (re_late2.sub(highlightLate2,
+                         (re_late.sub(highlightLate,
+                                      re_pri.sub(highlightPriority, item))))),
   if TODOTXT_VERBOSE is not 0:
     print "--"
     print "TODO:", len(SRC), " of ", originalSRCLenth, " tasks shown"
@@ -302,16 +313,16 @@ def _add(FILE,TERMS):
     TERMS=list()
     TERMS.append(raw_input('Add:'))
   elif len(TERMS)==0:
-    sys.exit('usage: TODO add "TODO ITEM"') 
+    sys.exit('usage: TODO add "TODO ITEM"')
   _addto(FILE,TERMS)
 
 daysOfWeekDict = dict(zip('monday tuesday wednesday thursday friday saturday \
                           sunday mon tue wed thur fri sat sun'.split(),
                 range(7)+range(7)))
 
-def getDateFromDayOf(dateTimeObj, reqDayOf):  
+def getDateFromDayOf(dateTimeObj, reqDayOf):
   #return the dateTimeObj of the next occurance of reqDayOf( monday )
-  weekday = dateTimeObj.weekday()        
+  weekday = dateTimeObj.weekday()
   return dateTimeObj + datetime.timedelta(days=(daysOfWeekDict[reqDayOf.lower()]-weekday-1)%7+1)
 
 def expandDateInDue(TERMstr):
@@ -345,8 +356,8 @@ def expandDateInDue(TERMstr):
 def _addto(FILE,TERMS):
   #TERMS needs to end up as one string
   for x in range(0,len(TERMS)):
-    TERMS[x]=expandDateInDue(TERMS[x]) 
-  
+    TERMS[x]=expandDateInDue(TERMS[x])
+
   input= " ".join(TERMS)+"\n"
   if TODOTXT_DATE_ON_ADD is not 0:
     input=datetime.date.today().strftime('%Y-%m-%d ')+input
@@ -365,13 +376,13 @@ def _append(FILE,itemNum,TERMS):
   if len(TERMS)==0 and TODOTXT_FORCE == 0:
     input = raw_input('Append:')
   elif len(TERMS)==0:
-    sys.exit('usage: TODO append ITEM# "TEXT TO APPEND"') 
+    sys.exit('usage: TODO append ITEM# "TEXT TO APPEND"')
 
   inputList=input.split()
   for x in range(0,len(inputList)):
-    inputList[x]=expandDateInDue(inputList[x]) 
+    inputList[x]=expandDateInDue(inputList[x])
   input= " ".join(inputList)
-  
+
   with open(FILE, "r") as source:
     lines = source.readlines()
 
@@ -383,14 +394,14 @@ def _append(FILE,itemNum,TERMS):
     lineCount=0
     for line in lines:
         lineCount += 1
-        if lineCount != itemNum: 
+        if lineCount != itemNum:
           source.write(line)
         else:
           line=line.rstrip('\n')+" "+input+'\n'
           source.write(line)
           if TODOTXT_VERBOSE is not 0:
             print lineCount," ",line
- 
+
 def _archive(TODO,DONE):
   completedLines=[]
   todoLines=[]
@@ -419,57 +430,57 @@ def main():
     TODOTXT_DEFAULT_ACTION,TODOTXT_SORT_COMMAND,TODOTXT_FINAL_FILTER, \
     TODOTXT_SORT_ALPHA, TODOTXT_ANSI
 
-  global PRI_A,PRI_B,PRI_C,PRI_X,LATE,COLOR_DONE 
+  global PRI_A,PRI_B,PRI_C,PRI_X,LATE,COLOR_DONE
 
   theme = None
 
   parser = argparse.ArgumentParser(description='Process some todos.',
-                                   formatter_class=argparse.RawTextHelpFormatter) 
-  
+                                   formatter_class=argparse.RawTextHelpFormatter)
+
   parser.add_argument('-a', dest='TODOTXT_AUTO_ARCHIVE', action='store_const',
-                   const=0, 
+                   const=0,
                    help="Don't auto-archive tasks automatically on completion")
   parser.add_argument('-d', dest='TODOTXT_CFG_FILE', action='store',
                    help="Use a configuration file other than the default ~/.todo/config")
   parser.add_argument('-f', dest='TODOTXT_FORCE', action='store_const',
-                   const=1, 
+                   const=1,
                    help="Forces actions without confirmation or interactive input")
   parser.add_argument('-v', dest='TODOTXT_VERBOSE', action='store_const',
-                   const=1, 
+                   const=1,
                    help="Verbose mode turns on confirmation messages")
   parser.add_argument('-vv', dest='TODOTXT_VERBOSE', action='store_const',
-                   const=2, 
+                   const=2,
                    help="Extra verbose mode print some debugging information.")
   parser.add_argument('-p', dest='TODOTXT_PLAIN', action='store_const',
-                   const=1, 
+                   const=1,
                    help="Plain mode turns off colors")
   parser.add_argument('-n', dest='TODOTXT_PRESERVE_LINE_NUMBERS', action='store_const',
-                   const=1, 
-                   help="Don't preserve line numbers; automatically remove blank lines on task deletion") 
+                   const=1,
+                   help="Don't preserve line numbers; automatically remove blank lines on task deletion")
   parser.add_argument('-t', dest='TODOTXT_DATE_ON_ADD', action='store_const',
-                   const=1, 
-                   help="Prepend the current date to a task automatically when it's added") 
+                   const=1,
+                   help="Prepend the current date to a task automatically when it's added")
   parser.add_argument('-A', dest='TODOTXT_SORT_ALPHA', action='store_const',
-                   const=1, 
-                   help="Sort Alphabetically.  Default is false and list as saved in the file") 
+                   const=1,
+                   help="Sort Alphabetically.  Default is false and list as saved in the file")
   parser.add_argument('--ansi', dest='TODOTXT_ANSI', action='store_const',
-                   const=1, 
-                   help="Force the use of ANSI escape charater for color.  Useful in Windows if you are using a Terminal that understands them.") 
-  parser.add_argument('--ansi_theme', dest='TODOTXT_COLOR_THEME', 
+                   const=1,
+                   help="Force the use of ANSI escape charater for color.  Useful in Windows if you are using a Terminal that understands them.")
+  parser.add_argument('--ansi_theme', dest='TODOTXT_COLOR_THEME',
                    choices=['light','dark'], default='None',
-                   help="Pick 'dark' or 'light' theme when using ANSI. Ignored if not.") 
+                   help="Pick 'dark' or 'light' theme when using ANSI. Ignored if not.")
 
   #parser.add_argument('--writeConfig', dest='TODOTXT_WRITECONFIG', action='store_true',
-                   #help="Write the config file from all active configurateion options. This requires at least one positional argument.  Try --writeConfig ls") 
+                   #help="Write the config file from all active configurateion options. This requires at least one positional argument.  Try --writeConfig ls")
 
   list_of_choices=['list','ls','add','a','addto','append','app','archive','do',
                    'del','rm','depri','dp','help','listall','lsa','listcon','lsc',
-                   'listfile','lsf','listpri','lsp','listproj','lsprj', 
+                   'listfile','lsf','listpri','lsp','listproj','lsprj',
                    'move','mv','prepend','prep','pri','replace','p','report','version']
-  parser.add_argument(dest='actions',metavar='action', 
+  parser.add_argument(dest='actions',metavar='action',
                       choices=list_of_choices,
                       default=argparse.SUPPRESS,
-                      help= 
+                      help=
                       'add|a "THING I NEED TO DO +projeect @context"\n'
                       'addto DESTFILE "TEXT TO ADD"\n'
                       'append|app  ITEM# "TEXT TO APPEND" \n'
@@ -487,12 +498,12 @@ def main():
                       'listproj|lsprj\n'
                       'move|mv ITEM# DEST [SRC]\n'
                       'prepend|prep ITEM# "TEXT TO PREPEND"\n'
-                      'pri|p ITEM#  PRIORITY\n'  
+                      'pri|p ITEM#  PRIORITY\n'
                       'replace ITEM# "TEXT TO REPLACE"\n'
                       'report\n'
                       'version\n'
                       )
-  parser.add_argument(dest='remainingArguments',metavar='See "help" for more details', 
+  parser.add_argument(dest='remainingArguments',metavar='See "help" for more details',
                       nargs=argparse.REMAINDER, default=argparse.SUPPRESS)
   args=parser.parse_args()
   if TODOTXT_VERBOSE >=2:
@@ -505,23 +516,23 @@ def main():
   if os.environ.has_key('TODOTXT_DIR'):
     TODOTXT_DIR=os.environ.get('TODOTXT_DIR') # use TODOTXT_DIR everywhere else
   TODOTXT_AUTO_ARCHIVE=os.environ.get('TODOTXT_AUTO_ARCHIVE') # is same as option -a
-  TODOTXT_CFG_FILE=os.environ.get('TODOTXT_CFG_FILE')         
+  TODOTXT_CFG_FILE=os.environ.get('TODOTXT_CFG_FILE')
                                               # is same as option -d CONFIG_FILE
   TODOTXT_FORCE=os.environ.get('TODOTXT_FORCE')               # is same as option -f
-  TODOTXT_PRESERVE_LINE_NUMBERS=os.environ.get('TODOTXT_PRESERVE_LINE_NUMBERS')    
+  TODOTXT_PRESERVE_LINE_NUMBERS=os.environ.get('TODOTXT_PRESERVE_LINE_NUMBERS')
                                                           # is same as option -n
   TODOTXT_PLAIN=os.environ.get('TODOTXT_PLAIN')               # is same as option -p
   TODOTXT_DATE_ON_ADD=os.environ.get('TODOTXT_DATE_ON_ADD')   # is same as option -t
   TODOTXT_VERBOSE=os.environ.get('TODOTXT_VERBOSE')           # is same as option -v
   TODOTXT_ANSI=os.environ.get('TODOTXT_ANSI')                 # is same as option --ANSI
 
-  
+
   if TODOTXT_DIR is None:
     TODOTXT_DIR = os.path.expanduser("~/.todo")
     if TODOTXT_VERBOSE >= 2:
-      print "After positive  check against None: TODOTXT_DIR is:",TODOTXT_DIR 
+      print "After positive  check against None: TODOTXT_DIR is:",TODOTXT_DIR
   elif TODOTXT_VERBOSE >= 2:
-    print "After negative check against Non:TODOTXT_DIR:",TODOTXT_DIR     
+    print "After negative check against Non:TODOTXT_DIR:",TODOTXT_DIR
   TODO_FILE=TODOTXT_DIR+"/todo.txt"
   DONE_FILE=TODOTXT_DIR+"/done.txt"
   REPORT_FILE=TODOTXT_DIR+"/report.txt"
@@ -533,18 +544,18 @@ def main():
         print "not set TODOTXT_CFG_FILE:"
 
 # Process configuration files
-# this requires one of the command line arguments(getting the CFG FILE) 
+# this requires one of the command line arguments(getting the CFG FILE)
 # to be processed
   if args.TODOTXT_CFG_FILE is not None:
-    TODOTXT_CFG_FILE=args.TODOTXT_CFG_FILE 
+    TODOTXT_CFG_FILE=args.TODOTXT_CFG_FILE
   else:
     TODOTXT_CFG_FILE=TODOTXT_DIR+"/todo.cfg"
-  cfgparser = ConfigParser(allow_no_value=True)    
-  try: 
-    cfgparser.read(TODOTXT_CFG_FILE)                    
+  cfgparser = ConfigParser(allow_no_value=True)
+  try:
+    cfgparser.read(TODOTXT_CFG_FILE)
     param = {k:v for k,v in cfgparser.items('TODO') }
     if TODOTXT_VERBOSE > 1:
-      print "Config File Parameters",param                            
+      print "Config File Parameters",param
     if "TODOTXT_AUTO_ARCHIVE".lower() in param:
       TODOTXT_AUTO_ARCHIVE=cfgparser.getint('TODO',"TODOTXT_AUTO_ARCHIVE".lower())
     if "TODOTXT_FORCE".lower() in param:
@@ -565,17 +576,17 @@ def main():
       TODOTXT_ANSI=cfgparser.getint('TODO',"TODOTXT_COLOR_THEME".lower())
   except:
     if TODOTXT_VERBOSE >= 2:
-      print "no cfg file to read" 
+      print "no cfg file to read"
 
 # Process (the rest of) command line arguments
   if args.TODOTXT_AUTO_ARCHIVE is not None:
     TODOTXT_AUTO_ARCHIVE=args.TODOTXT_AUTO_ARCHIVE
   if args.TODOTXT_FORCE is not None:
-    TODOTXT_FORCE=args.TODOTXT_FORCE 
+    TODOTXT_FORCE=args.TODOTXT_FORCE
   if args.TODOTXT_VERBOSE is not None:
-    TODOTXT_VERBOSE=args.TODOTXT_VERBOSE 
+    TODOTXT_VERBOSE=args.TODOTXT_VERBOSE
   if args.TODOTXT_PLAIN is not None:
-    TODOTXT_PLAIN=args.TODOTXT_PLAIN 
+    TODOTXT_PLAIN=args.TODOTXT_PLAIN
   if args.TODOTXT_PRESERVE_LINE_NUMBERS is not None:
     TODOTXT_PRESERVE_LINE_NUMBERS=args.TODOTXT_PRESERVE_LINE_NUMBERS
   if args.TODOTXT_DATE_ON_ADD is not None:
@@ -593,20 +604,20 @@ def main():
     print "TODOTXT_CFG_FILE:",TODOTXT_CFG_FILE
     print "TODOTXT_DIR ",TODOTXT_DIR
     print "TODO_FILE",TODO_FILE
-    print "TODOTXT_FORCE",TODOTXT_FORCE  
+    print "TODOTXT_FORCE",TODOTXT_FORCE
     print "TODOTXT_DATE_ON_ADD", TODOTXT_DATE_ON_ADD
     print "TODOTXT_SORT_ALPHA", TODOTXT_SORT_ALPHA
     print "TODOTXT_ANSI", TODOTXT_ANSI
     print "TODOTXT_COLOR_THEME", TODOTXT_COLOR_THEME
     print "TODOTXT_PLAIN", TODOTXT_PLAIN
     print "TODOTXT_AUTO_ARCHIVE",TODOTXT_AUTO_ARCHIVE
-    print "TODOTXT_FORCE",TODOTXT_FORCE 
-    print "TODOTXT_VERBOSE",TODOTXT_VERBOSE 
+    print "TODOTXT_FORCE",TODOTXT_FORCE
+    print "TODOTXT_VERBOSE",TODOTXT_VERBOSE
     print "TODOTXT_PRESERVE_LINE_NUMBERS",TODOTXT_PRESERVE_LINE_NUMBERS
     print "TODOTXT_DATE_ON_ADD",TODOTXT_DATE_ON_ADD
     print "TODOTXT_SORT_ALPHA",TODOTXT_SORT_ALPHA
 
- 
+
 # Set the color theme
 # Windows CMD themes require ctypes module only core > python 2.5
   #theme=TODOTXT_COLOR_THEME
@@ -635,11 +646,11 @@ def main():
     if case('list') or case ('ls'):
         _list(TODO_FILE,args.remainingArguments)
         break
-    if case('listall','lsa'): 
+    if case('listall','lsa'):
         _list(TODO_FILE,args.remainingArguments)
         _list(DONE_FILE,args.remainingArguments)
         break
-    if case('listcon','lsc'): 
+    if case('listcon','lsc'):
         with open(TODO_FILE, "r") as source:
           lines = source.readlines()
         #find all the contexts and return them.  you get lists of lists
@@ -650,10 +661,10 @@ def main():
         clist=list(set(blist))
         for x in clist: print x
         break
-    if case('listfile','lsf'): 
+    if case('listfile','lsf'):
         SRC=args.remainingArguments.pop(0)  #pop the 1st item off the list as the file
         _list(SRC,args.remainingArguments)
-        break    
+        break
     if case('listpri','lsp'):
         if len(args.remainingArguments) > 0 :
           PRI= args.remainingArguments.pop(0)
@@ -677,7 +688,7 @@ def main():
             print "error: this doesn't do what you think it should.  It shows items with a ("
           _list(TODO_FILE,'(')
           break
-        break    
+        break
     if case('listproj','lsprj'):
       with open(TODO_FILE, "r") as source:
         lines = source.readlines()
@@ -692,27 +703,27 @@ def main():
     if case('move','mv'):
       # replace moved line with a blank line when TODOTXT_PRESERVE_LINE_NUMBERS is 1
       errmsg="usage: TODO mv ITEM# DEST [SRC]"
-      if len(args.remainingArguments) > 0 : 
+      if len(args.remainingArguments) > 0 :
         itemNum = args.remainingArguments.pop(0)
       else: print errmsg;break
-      if len(args.remainingArguments) > 0 : 
+      if len(args.remainingArguments) > 0 :
         dest=TODOTXT_DIR +"/"+  args.remainingArguments.pop(0)
       else: print errmsg;break
-      if len(args.remainingArguments) > 0 : 
+      if len(args.remainingArguments) > 0 :
         src =TODOTXT_DIR +"/"+  args.remainingArguments.pop(0)
       else: src=TODO_FILE
 
-      if not os.path.isfile(dest): sys.exit("TODO: Destination file "+dest+" does not exist") 
-      if not os.path.isfile(src): sys.exit("TODO: Destination file "+src+" does not exist") 
+      if not os.path.isfile(dest): sys.exit("TODO: Destination file "+dest+" does not exist")
+      if not os.path.isfile(src): sys.exit("TODO: Destination file "+src+" does not exist")
 
       if re.match('(\d+)',itemNum):
         itemNum=int(itemNum)-1
       else:
-        sys.exit(errmsg) 
+        sys.exit(errmsg)
 
       with open(src, "r") as source:
         lines = source.readlines()
-      if (len(lines)<itemNum): 
+      if (len(lines)<itemNum):
         sys.exit( '{0}:No such item in {1}'.format(itemNum+1, src))
 
       question = 'Move {0} from {1} to {2}? (Y/n)'.format(lines[itemNum],src,dest)
@@ -721,7 +732,7 @@ def main():
       else:
         answer = 'Y'
 
-      if answer == 'Y': 
+      if answer == 'Y':
         if TODOTXT_PRESERVE_LINE_NUMBERS == 0:
           #delete line numbers
           line=[]
@@ -749,7 +760,7 @@ def main():
       else:
         sys.exit ("Error: need ITEM#")
 
-      if len(args.remainingArguments) == 0 and TODOTXT_FORCE == 0: 
+      if len(args.remainingArguments) == 0 and TODOTXT_FORCE == 0:
         TEXT = raw_input(querytext)
       else:
         TEXT = " ".join(args.remainingArguments)
@@ -772,7 +783,7 @@ def main():
         prepdate=''
       else:
         prepdate=mTODO.group(2)+" "
-      if action == 'replace': 
+      if action == 'replace':
         itemText=TEXT
       else:
         itemText=TEXT+" "+mTODO.group(3)
@@ -843,7 +854,7 @@ def main():
 
     if case('del','rm'):
       errmsg='usage: todo del ITEM# TERM'
-      if len(args.remainingArguments) > 0 : 
+      if len(args.remainingArguments) > 0 :
         itemNum = args.remainingArguments.pop(0)
         itemNum.replace(',','')  #if comma separated remove the comma,
         itemNum=int(itemNum)
@@ -859,27 +870,27 @@ def main():
       else:
         errmsg2="error: todo list only has {0} items".format(len(lines))
         sys.exit(errmsg2)
- 
+
       if len(args.remainingArguments) == 0 : #just delete the item
         if TODOTXT_FORCE is 0:
           question = "\nDelete '"+lines[itemNum]+"'? (Y/n)"
           var = raw_input(question)
         else:
           var='Y'
-        if var == 'Y': 
+        if var == 'Y':
           deleteMe=lines[itemNum]
           lines[itemNum]="\n"
-          if TODOTXT_VERBOSE > 1:  
+          if TODOTXT_VERBOSE > 1:
             print "You entered ", var, ", deleting."
-          if  TODOTXT_PRESERVE_LINE_NUMBERS == 0: #then get rid of empty lines before 
-          #writing need to do this afterwards because deleting within the for above 
+          if  TODOTXT_PRESERVE_LINE_NUMBERS == 0: #then get rid of empty lines before
+          #writing need to do this afterwards because deleting within the for above
           #for multiple deletes will mess up the index
-            lines = [ line for line in lines if line != "\n"] 
-          if TODOTXT_VERBOSE is not 0:  
+            lines = [ line for line in lines if line != "\n"]
+          if TODOTXT_VERBOSE is not 0:
             print itemNum+1," ",deleteMe
             print "TODO: ",itemNum+1,"deleted."
             #print "TODO: ",linesDeleted,"task(s) deleted"
-        else:  
+        else:
           print "You entered ",var," OK, not deleting."
       else: #just delete the TERM from the line
         TERM = args.remainingArguments.pop(0)
@@ -889,17 +900,17 @@ def main():
           print itemNum+1," ",deleteMe
           print "TODO: Removed ",TERM," from task."
           print itemNum+1," ",newTodo
-         
+
       with open(TODO_FILE, "wb") as file:
         file.writelines(lines)
       break
 
-    if case('append','app'): 
+    if case('append','app'):
       errmsg='usage: todo append ITEM# "TEXT TO APPEND"'
       if len(args.remainingArguments) > 0:
-        try: 
+        try:
           item = int(args.remainingArguments.pop(0))
-        except ValueError: 
+        except ValueError:
           sys.exit(errmsg)
         if item == 0:
           sys.exit("error: the 1st ITEM# is 1")
@@ -926,14 +937,14 @@ def main():
 
       with open(TODO_FILE, "r") as source:
         lines = source.readlines()
-    
+
       if (itemNum < 0) or (itemNum+1 > len(lines)):
         sys.exit(errmsg+"ITEM# needs to be equal to a line#")
 
       #get rid of the current Priority
       lines[itemNum]=re.sub('^\(.\)','',lines[itemNum])
-      #add the new priority 
-      lines[itemNum]="(" + PRIORITY + ") " + lines[itemNum] 
+      #add the new priority
+      lines[itemNum]="(" + PRIORITY + ") " + lines[itemNum]
       with open(TODO_FILE, "wb") as file:
         file.writelines(lines)
       if TODOTXT_VERBOSE is not 0:
@@ -967,7 +978,7 @@ def main():
       #need to makes sure it's closed properly
       if not os.path.exists(REPORT_FILE):
         #create file and write header
-        f=open(REPORT_FILE, 'wb') 
+        f=open(REPORT_FILE, 'wb')
         f.write("datetime            todos dones\n")
       else:
         #append stuff
@@ -981,7 +992,7 @@ def main():
       break
     if case('version'):
       print """TODO.TXT Command Line Interface (in Python) version 1
-First Release : 2013-04-08 
+First Release : 2013-04-08
 Project/Code Page : https://github.com/alapolloni/todo.txt-py
 Original conception by : Gina Trapani (http://ginatrapani.org)
 License : GPL, http://www.gnu.org/copyleft/gpl.html
@@ -989,7 +1000,7 @@ More information and mailing list at http://todotxt.com
 """
       break
     if case('help'):
-      #TODO oneline_usage 
+      #TODO oneline_usage
       print """
   usage: todo.py [-h] [-a] [-d TODOTXT_CFG_FILE] [-f] [-v] [-vv] [-p] [-n] [-t]
                [-A] [--ansi] [--ansi_theme {light,dark}]
@@ -1109,10 +1120,10 @@ More information and mailing list at http://todotxt.com
         Verbose mode turns on confirmation messages
     -vv
         Extra verbose mode prints some debugging information
-    --ansi                
-            Force the use of ANSI escape charater for color.  Useful in Windows if you are using a Terminal that understands them.      
-        --ansi_theme {light,dark} 
-             Pick 'dark' or 'light' theme when using ANSI. Ignored if not.                                                               
+    --ansi
+            Force the use of ANSI escape charater for color.  Useful in Windows if you are using a Terminal that understands them.
+        --ansi_theme {light,dark}
+             Pick 'dark' or 'light' theme when using ANSI. Ignored if not.
       Extras:
         Due dates:  You can add a due date and it will be colored red if due today or before.
                     Format is:
@@ -1120,7 +1131,7 @@ More information and mailing list at http://todotxt.com
                     Ex: due:2013-01-31 or due:2013-01-31 01:00
 
       Environment variables:
-        TODOTXT_DIR=DIRECTORY           
+        TODOTXT_DIR=DIRECTORY
         TODOTXT_AUTO_ARCHIVE=0          is same as option -a
         TODOTXT_CFG_FILE=CONFIG_FILE    is same as option -d CONFIG_FILE
         TODOTXT_FORCE=1                 is same as option -f
@@ -1143,7 +1154,7 @@ More information and mailing list at http://todotxt.com
 # This is the standard boilerplate that calls the main() function.
 if __name__ == '__main__':
 
-  
+
   main()
 
 
