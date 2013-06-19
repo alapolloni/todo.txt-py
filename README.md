@@ -34,6 +34,7 @@ If you are using an ANSI compatible Terminal as a replacement for Window's cmd.e
 - Most of the colorization code originally came from https://github.com/abztrakt/ya-todo-py/blob/master/todo.py(which i think came from Shane Koster <shane.koster@gmail.com> ).
 
 ## TODO/ISSUES ##
+-  issue - todo do ITEM# - sanity check that item# is an integer
 -  (re?) prioritizing adds an odd space after the priority
 -  add sanity checks like in todo.sh
 -  add e for edit todo.txt in editor
